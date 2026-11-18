@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ethos Orakel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>body{margin:0}</style>
+<style>
+/* Layout: eine Bühne in der Mitte, Fantasy-Nacht in Indigo mit Gold und arkanem Türkis; jeder Bildschirm ist eine Karte auf der Bühne. */
+:root{
+  --bg:#0a0916;--bg2:#13112b;--panel:rgba(26,22,58,.82);--panel-2:rgba(38,32,82,.7);--line:#3b3477;--line-2:#554ca3;
+  --gold:#e5bb5c;--gold-2:#f6dc90;--gold-ink:#241a05;--arc:#6fe6d6;--vio:#9a7cf5;--ember:#f2905f;
+  --good:#5fd69a;--good-bg:rgba(95,214,154,.16);--bad:#f2647d;--bad-bg:rgba(242,100,125,.16);
+  --fg:#efeaff;--fg-2:#b9b3e0;--fg-3:#8883bd;
+  --display:"Cinzel","Trajan Pro","Palatino Linotype",Georgia,serif;--body:"Alegreya Sans","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100dvh}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 520px at 78% -8%,rgba(154,124,245,.22),transparent 65%),radial-gradient(800px 600px at 8% 108%,rgba(111,230,214,.12),transparent 60%),linear-gradient(180deg,#0c0a1d,#08070f)}
+#motes{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0;text-align:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--arc);outline-offset:2px;border-radius:8px}
+svg.i{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;min-height:100dvh;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column}
+.screen{flex:1;display:flex;flex-direction:column;gap:18px;min-width:0}
+.screen.fresh{animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.center{align-items:center;justify-content:center;text-align:center}
+.logo{font-family:var(--display);font-weight:900;letter-spacing:.32em;font-size:clamp(44px,10vw,92px);line-height:1;color:var(--gold-2);text-shadow:0 0 28px rgba(229,187,92,.45),0 2px 0 #7a5a16;margin-right:-.32em}
+.sub{font-family:var(--display);letter-spacing:.28em;text-transform:uppercase;font-size:clamp(11px,2.4vw,14px);color:var(--arc);margin-top:10px}
+.h2{font-family:var(--display);font-weight:700;font-size:clamp(20px,3.4vw,28px);color:var(--gold-2);letter-spacing:.03em;text-wrap:balance}
+.lbl{font-family:var(--display);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-3)}
+.muted{color:var(--fg-2)}.sp{flex:1}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;backdrop-filter:blur(6px);box-shadow:0 10px 40px rgba(0,0,0,.35);min-width:0}
+.panel.pad-s{padding:14px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:11px 20px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel-2);font-family:var(--display);font-weight:700;letter-spacing:.05em;font-size:15px;color:var(--fg);transition:transform .15s,background .15s,border-color .15s}
+.btn:hover{background:rgba(70,60,140,.55);border-color:var(--vio);transform:translateY(-1px)}
+.btn.gold{background:linear-gradient(180deg,#f3d27e,#cf9f3d);border-color:#ffe9a8;color:var(--gold-ink);box-shadow:0 0 22px rgba(229,187,92,.3)}
+.btn.gold:hover{background:linear-gradient(180deg,#ffe09a,#dba945)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--fg-2)}
+.btn.sm{padding:6px 12px;font-size:13px;border-radius:9px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.big{padding:15px 28px;font-size:17px}
+.icon-btn{width:38px;height:38px;border-radius:10px;display:inline-grid;place-items:center;color:var(--fg-2);font-size:19px}
+.icon-btn:hover{background:var(--panel-2);color:var(--fg)}
+input[type=text]{width:100%;background:rgba(8,7,20,.7);border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;font-size:18px;min-width:0}
+input[type=text]:focus{outline:2px solid var(--arc);outline-offset:0;border-color:transparent}
+.codein{text-align:center;letter-spacing:.35em;text-transform:uppercase;font-family:var(--display);font-weight:700;font-size:20px;max-width:200px}
+.av{width:var(--sz);height:var(--sz);border-radius:50%;display:inline-grid;place-items:center;flex:none;background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--c) 70%,white),var(--c));color:#0b0a18;border:2px solid rgba(255,255,255,.35)}
+.av svg{width:58%;height:58%;stroke-width:2}
+.sigs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sig{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;border-radius:14px;border:1px solid transparent;width:84px;font-size:13px;color:var(--fg-2)}
+.sig:hover{background:var(--panel-2)}
+.sig.on{border-color:var(--gold);background:rgba(229,187,92,.1);color:var(--gold-2)}
+.intro-card{width:min(440px,100%);display:flex;flex-direction:column;gap:18px;text-align:left}
+.menu-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+.hero{display:flex;gap:16px;align-items:center}
+.hero .nm{font-family:var(--display);font-size:24px;font-weight:700;color:var(--gold-2);overflow-wrap:anywhere}
+.xp{height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:8px}
+.xp i{display:block;height:100%;background:linear-gradient(90deg,var(--arc),var(--vio));border-radius:99px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:700;background:rgba(255,255,255,.08);color:var(--fg-2)}
+.chip.ok{background:var(--good-bg);color:var(--good)}.chip.warn{background:rgba(242,144,95,.16);color:var(--ember)}
+.opt-btns{display:grid;gap:12px}
+.code-box{font-family:var(--display);font-weight:900;font-size:clamp(34px,8vw,56px);letter-spacing:.22em;color:var(--gold-2);text-shadow:0 0 20px rgba(229,187,92,.4);margin-right:-.22em}
+.players{display:flex;flex-direction:column;gap:8px}
+.pl{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);min-width:0}
+.pl .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.pl.me{border:1px solid var(--line-2)}
+.pl .sc{font-family:var(--display);font-weight:700;color:var(--gold-2);font-variant-numeric:tabular-nums}
+.pl.done .nm::after{content:" ✓";color:var(--good)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{padding:14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:6px;text-align:left}
+.mode b{font-family:var(--display);font-size:16px;display:flex;gap:8px;align-items:center}
+.mode span{font-size:14px;color:var(--fg-2)}
+.mode.on{border-color:var(--gold);background:rgba(229,187,92,.1)}
+.mode[disabled]{pointer-events:none}
+.tps{display:flex;flex-wrap:wrap;gap:8px}
+.tp{padding:6px 12px;border-radius:99px;border:1px solid var(--line);font-size:14px;font-weight:700;color:var(--fg-3);display:inline-flex;gap:7px;align-items:center}
+.tp i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.tp.on{color:var(--fg);border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.tp[disabled]{pointer-events:none}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.seg button{padding:7px 14px;font-weight:700;font-size:14px;color:var(--fg-2)}
+.seg button.on{background:rgba(229,187,92,.18);color:var(--gold-2)}
+.seg[disabled] button{pointer-events:none}
+/* Ladebildschirm */
+.ring{width:130px;height:130px;position:relative;margin:6px auto 0}
+.ring i{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--gold);border-right-color:rgba(229,187,92,.3);animation:spin 2.4s linear infinite}
+.ring i:nth-child(2){inset:14px;border-top-color:var(--arc);border-right-color:rgba(111,230,214,.3);animation-duration:1.7s;animation-direction:reverse}
+.ring i:nth-child(3){inset:30px;border-top-color:var(--vio);border-right-color:rgba(154,124,245,.3);animation-duration:1.2s}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:40px;color:var(--gold-2);animation:pulse 2.4s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.55;transform:scale(.92)}}
+.tipbox{max-width:560px;min-height:118px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center}
+.tipbox p{font-size:20px;line-height:1.4;animation:rise .5s ease both}
+.prog{width:min(420px,80vw);height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--arc));transition:width .4s linear}
+/* Spiel */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
+.hud{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.nodes{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.node{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--fg-3)}
+.node.now{border-color:var(--gold);color:var(--gold-2);box-shadow:0 0 12px rgba(229,187,92,.5)}
+.node.past{background:rgba(111,230,214,.2);border-color:var(--arc);color:var(--arc)}
+.node.boss{width:30px;height:30px;border-radius:9px;font-size:15px}
+.timer{flex:1;min-width:120px;height:10px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--arc),var(--gold));border-radius:99px}
+.timer.low i{background:var(--bad)}
+.tsec{font-family:var(--display);font-weight:700;font-size:18px;min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.qcard{display:flex;flex-direction:column;gap:16px}
+.qtag{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qtext{font-family:var(--display);font-weight:500;font-size:clamp(19px,3vw,25px);line-height:1.35;color:var(--fg);text-wrap:balance}
+.story{font-style:italic;color:var(--arc);font-size:16px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opts.one{grid-template-columns:1fr}
+.opt{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.04);font-size:17px;min-width:0;overflow-wrap:anywhere;transition:border-color .15s,background .15s,transform .15s}
+.opt:hover{border-color:var(--gold);background:rgba(229,187,92,.08);transform:translateY(-1px)}
+.opt .k{font-family:var(--display);font-weight:700;color:var(--gold);width:22px;flex:none}
+.opt.sel{border-color:var(--gold);background:rgba(229,187,92,.14)}
+.opt.ok{border-color:var(--good);background:var(--good-bg)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt.dim{opacity:.55}
+.opt.lock{pointer-events:none}
+.opt .dots{position:absolute;right:8px;top:-12px;display:flex}
+.opt .dots .av{margin-left:-6px;border-color:var(--bg)}
+.tag{margin-left:auto;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.tag.me{background:rgba(229,187,92,.2);color:var(--gold-2)}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 18px}
+.pair .opt{align-items:center}
+.pair .lt{font-family:var(--display);font-weight:900;width:24px;height:24px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:inline-grid;place-items:center;font-size:13px;flex:none}
+.slot{margin-left:auto;font-family:var(--display);font-weight:900;color:var(--gold-2)}
+.expl{padding:14px 16px;border-radius:14px;background:rgba(111,230,214,.08);border:1px solid rgba(111,230,214,.3);color:var(--fg)}
+.expl b{color:var(--arc);font-family:var(--display);letter-spacing:.06em}
+.banner{display:flex;gap:12px;align-items:center;padding:12px 16px;border-radius:14px;font-family:var(--display);font-weight:700}
+.banner.good{background:var(--good-bg);color:var(--good);border:1px solid var(--good)}
+.banner.bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad)}
+.banner.neutral{background:rgba(255,255,255,.06);color:var(--fg-2);border:1px solid var(--line)}
+.flames{display:flex;gap:4px;font-size:22px;color:var(--ember)}
+.flames .off{color:rgba(255,255,255,.18)}
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:12px}
+.boss-case{border:1px solid var(--gold);background:linear-gradient(180deg,rgba(229,187,92,.12),rgba(229,187,92,.03));border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.boss-case h3{font-family:var(--display);color:var(--gold-2);font-size:20px}
+.lens{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+.lens h4{margin:0;font-family:var(--display);font-size:15px;letter-spacing:.06em;color:var(--arc);display:flex;align-items:center;gap:8px}
+.lens .opt{padding:10px 12px;font-size:16px}
+.votes{display:flex;gap:10px;flex-wrap:wrap}
+.votes .opt{flex:1 1 180px}
+.vbar{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}.vbar i{display:block;height:100%;background:var(--vio)}
+.podium{display:flex;gap:14px;align-items:flex-end;justify-content:center;flex-wrap:wrap;margin:6px 0}
+.pod{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);min-width:120px;border:1px solid var(--line)}
+.pod.first{border-color:var(--gold);background:rgba(229,187,92,.12);transform:translateY(-12px)}
+.pod .rk{font-family:var(--display);font-weight:900;font-size:26px;color:var(--gold-2)}
+.gain{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.badge{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.badge.off{opacity:.4;filter:grayscale(1)}
+.badge .bi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(229,187,92,.16);color:var(--gold-2);font-size:21px;flex:none}
+.badge small{display:block;color:var(--fg-2);font-size:14px;line-height:1.25}
+/* Overlay & Buch */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(5,4,14,.78);display:grid;place-items:center;padding:max(14px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));animation:fade .25s ease both}
+@keyframes fade{from{opacity:0}}
+.book{width:min(920px,100%);max-height:100%;display:grid;grid-template-columns:210px minmax(0,1fr);border-radius:16px;overflow:hidden;border:1px solid var(--gold);background:#16122f;box-shadow:0 0 60px rgba(229,187,92,.2)}
+.toc{background:#0f0c24;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.toc button{padding:9px 10px;border-radius:9px;font-size:15px;color:var(--fg-2);line-height:1.25}
+.toc button:hover{background:var(--panel-2)}.toc button.on{background:rgba(229,187,92,.16);color:var(--gold-2);font-weight:700}
+.page{padding:22px 26px 26px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;max-height:min(80dvh,720px);animation:rise .35s ease both}
+.page h2{font-family:var(--display);color:var(--gold-2);font-size:26px;line-height:1.15}
+.page h3{font-family:var(--display);font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--arc)}
+.page ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.page .q{border-left:3px solid var(--gold);padding:6px 14px;font-style:italic;color:var(--gold-2);background:rgba(229,187,92,.07);border-radius:0 10px 10px 0}
+.page table{width:100%;border-collapse:collapse;font-size:15px;min-width:560px}
+.page th,.page td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.page th{background:rgba(255,255,255,.06);font-family:var(--display);font-size:13px;color:var(--gold-2)}
+.scrollx{overflow-x:auto;max-width:100%}
+.bhead{display:flex;align-items:center;gap:10px;grid-column:1/-1;padding:10px 14px;background:#0b091d;border-bottom:1px solid var(--line)}
+.dlg{width:min(560px,100%);display:flex;flex-direction:column;gap:14px;max-height:100%;overflow-y:auto}
+.toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;background:#241d52;border:1px solid var(--gold);color:var(--fg);padding:10px 18px;border-radius:12px;max-width:min(520px,calc(100vw - 32px));box-shadow:0 8px 30px rgba(0,0,0,.5);animation:rise .3s ease both}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@media (max-width:900px){.game{grid-template-columns:minmax(0,1fr)}.side{position:static}.menu-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){
+  body{font-size:16px}
+  .opts{grid-template-columns:1fr}.pair{gap:8px}.modes{grid-template-columns:1fr}
+  .book{grid-template-columns:minmax(0,1fr);max-height:100%;overflow-y:auto}
+  .toc{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}.toc button{white-space:nowrap}
+  .page{max-height:none;padding:18px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</head><body>
+<canvas id="motes" aria-hidden="true"></canvas>
+<div class="wrap" id="app"></div>
+<div id="overlay"></div>
+<div id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var LS={get:function(k,d){try{var v=localStorage.getItem('ethos-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem('ethos-'+k,JSON.stringify(v))}catch(e){}}};
+function hash(s){s=String(s);var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,r){r=r||Math.random;var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+var IC={star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5l6.5-.5z',moon:'M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z',
+flame:'M12 3c1 4 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z',shield:'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z',
+eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z',leaf:'M5 19C5 10 10 5 20 4c0 10-5 15-14 15zM5 19l8-8',
+book:'M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 21V5M9 7h6',swords:'M5 4l9 9M4 5l3 3M14 4l6 0 0 6-9 9M18 14l3 3M6 18l-3 3M9 15l-3 3',
+users:'M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 4.5a3.5 3.5 0 010 6.5M18 14.5c2.2.7 3.5 2.6 3.5 5',
+crown:'M3 8l4 4 5-7 5 7 4-4-2 11H5z',copy:'M9 9h11v11H9zM5 15V4h11',x:'M6 6l12 12M18 6L6 18',check:'M5 12.5l4.5 4.5L19 7.5',door:'M6 21V4h12v17M3 21h18M14 12h.01',
+award:'M12 15a6 6 0 100-12 6 6 0 000 12zM8.5 14L7 21l5-3 5 3-1.5-7',user:'M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-7 8-7s8 3 8 7',skull:'M12 3a8 8 0 00-5 14v3h10v-3a8 8 0 00-5-14zM9 12h.01M15 12h.01M10 17v3M14 17v3',
+scale:'M12 3v18M5 21h14M4 7h16M6 7l-3 7a3 3 0 006 0zM18 7l-3 7a3 3 0 006 0z',scroll:'M6 3h12v15a3 3 0 01-3 3H6a3 3 0 003-3V6a3 3 0 00-3-3zM10 8h5M10 12h5'};
+function icon(n,s){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"'+(s?' style="width:'+s+'px;height:'+s+'px"':'')+'><path d="'+IC[n]+'"/></svg>'}
+var SIGILS=[{n:'Sterndeuter',c:'#9a7cf5',g:'star'},{n:'Mondwandler',c:'#6fe6d6',g:'moon'},{n:'Flammenwahrer',c:'#f2905f',g:'flame'},{n:'Schildträger',c:'#e5bb5c',g:'shield'},{n:'Seher',c:'#f27ab0',g:'eye'},{n:'Waldhüter',c:'#7ad67a',g:'leaf'}];
+var RANKS=[[0,'Novize der Schatten'],[150,'Lehrling des Lichts'],[400,'Runenkundiger'],[800,'Hüter des Wissens'],[1500,'Weiser von Ethos'],[3000,'Erzmagier']];
+var TOPICS=[{id:'nw',n:'Normen & Werte',c:'#6fe6d6'},{id:'dl',n:'Dilemmas',c:'#f2905f'},{id:'ut',n:'Utilitarismus',c:'#e5bb5c'},{id:'kp',n:'Pflichtethik (Kant)',c:'#9a7cf5'},
+{id:'ki',n:'Kategorischer Imperativ',c:'#c9a0ff'},{id:'ch',n:'Christliche Ethik',c:'#f6dc90'},{id:'ve',n:'Verantwortungsethik',c:'#7ad67a'},{id:'mx',n:'Ethiken im Vergleich',c:'#f27ab0'}];
+var ALLTP=TOPICS.map(function(t){return t.id});
+var TOP={};TOPICS.forEach(function(t){TOP[t.id]=t});
+var ETH={ut:'Utilitarismus',kp:'Pflichtethik nach Kant',ch:'Christliche Ethik',ve:'Verantwortungsethik'};
+/* ---------- Fragenpool ---------- */
+var BANK=[],CNT={};
+function add(tp,ty,o){CNT[tp]=(CNT[tp]||0)+1;o.id=tp+CNT[tp];o.tp=tp;o.ty=ty;BANK.push(o)}
+function MC(tp,q,c,w,ex){add(tp,'mc',{q:q,c:c,w:w,ex:ex})}
+function TF(tp,q,a,ex){add(tp,'tf',{q:q,a:a,ex:ex})}
+function MA(tp,q,pairs,ex){add(tp,'ma',{q:q,p:pairs,ex:ex})}
+function OR(tp,q,items,ex){add(tp,'or',{q:q,items:items,ex:ex})}
+
+/* Normen, Werte, Moral, Ethik, Relativismus */
+MC('nw','Was beschreibt der Begriff „Ethik“ am genauesten?','Die wissenschaftliche Reflexion über Moral und ihre Begründung',['Die Gesamtheit der in einer Gesellschaft tatsächlich geltenden Regeln','Ein göttliches Gebot, das nicht hinterfragt wird','Das persönliche Bauchgefühl bei Entscheidungen'],'Moral ist die gelebte Praxis, Ethik das systematische Nachdenken darüber.');
+MC('nw','„Du sollst nicht stehlen“ ist ein Beispiel für …','eine Norm',['einen Wert','ein Dilemma','eine Tugend'],'Normen sagen, was getan oder unterlassen werden soll. Der Wert dahinter ist hier das Eigentum.');
+MC('nw','Welcher der folgenden Begriffe ist ein Wert?','Gerechtigkeit',['Parkverbot','Hausordnung','Schulpflicht'],'Werte sind Vorstellungen vom Wünschenswerten. Die anderen drei sind Normen.');
+TF('nw','Moral und Ethik bedeuten genau dasselbe.',false,'Moral meint geltende Regeln und Werte, Ethik die wissenschaftliche Reflexion darüber.');
+MC('nw','Was behauptet der moralische Relativismus?','Was moralisch richtig ist, hängt von Kultur, Zeit oder Person ab',['Alle Menschen müssen dieselben Normen befolgen','Moral ist reine Verstandessache und überall gleich','Es gibt keine Ethik, nur Gesetze'],'Das Gegenstück ist der Universalismus: Es gibt allgemein gültige Normen.');
+MC('nw','Welcher Einwand wird dem Relativismus oft gemacht?','Er kann Unrecht wie Sklaverei nicht kritisieren, wenn es kulturell üblich ist',['Er verbietet kulturelle Vielfalt','Er stützt sich nur auf göttliche Gebote','Er lässt ausschließlich Folgen zählen'],'Wenn alles relativ ist, fehlt ein Maßstab für Kritik über Kulturgrenzen hinweg.');
+TF('nw','Eine normative Aussage beschreibt, wie etwas ist; eine deskriptive sagt, wie etwas sein soll.',false,'Es ist umgekehrt: deskriptiv = beschreibend, normativ = fordernd.');
+MA('nw','Ordne den Begriff seiner Bedeutung zu.',[['Norm','Handlungsregel: Das soll man tun oder lassen'],['Wert','Vorstellung vom Wünschenswerten, z. B. Freiheit'],['Gewissen','Innere Instanz, die eigenes Handeln moralisch bewertet']],'Normen konkretisieren Werte; das Gewissen prüft, ob wir danach handeln.');
+OR('nw','Bringe die Schritte einer überlegten Entscheidung in eine sinnvolle Reihenfolge.',['Problem erkennen und klären','Informationen sammeln','Handlungsmöglichkeiten entwickeln','Folgen und Werte abwägen','Entscheiden und die Entscheidung überprüfen'],'Gute Entscheidungen werden schrittweise getroffen und später noch einmal reflektiert.');
+MC('nw','Was ist der „Sein-Sollen-Fehlschluss“?','Aus dem, was ist, wird unzulässig gefolgert, was sein soll',['Aus Normen wird gefolgert, was in der Natur geschieht','Die Verwechslung von Moral und Ethik','Die Annahme, dass Werte messbar sind'],'Nur weil etwas üblich ist, ist es noch nicht richtig (David Hume).');
+MC('nw','Die „Goldene Regel“ lautet sinngemäß …','Was du nicht willst, dass man dir tu, das füg auch keinem andern zu',['Handle so, dass der größte Nutzen entsteht','Gehorche immer der Obrigkeit','Der Zweck heiligt die Mittel'],'Sie findet sich in vielen Kulturen und Religionen.');
+MC('nw','Was bedeutet „Autonomie“ in der Ethik?','Selbstgesetzgebung: sich nach selbst eingesehenen Gründen richten',['Gehorsam gegenüber Autoritäten','Verzicht auf alle Regeln','Handeln nach Gefühl und Laune'],'Autonom handelt, wer sich aus Einsicht an Normen bindet, nicht aus bloßem Zwang.');
+/* Dilemmas */
+MC('dl','Was kennzeichnet ein moralisches Dilemma?','Zwei Handlungsmöglichkeiten, bei denen jeweils ein wichtiger Wert verletzt wird',['Eine Entscheidung, bei der die richtige Option offensichtlich ist','Ein Streit ohne moralischen Hintergrund','Eine Regel, die nie gebrochen werden darf'],'Im Dilemma gibt es keinen Weg ohne moralischen Preis.');
+MC('dl','Im klassischen Trolley-Problem kann man …','eine Weiche umstellen, sodass ein Wagen einen Menschen statt fünf trifft',['einen Zug stoppen, indem man selbst überfahren wird','ein Medikament stehlen, um ein Leben zu retten','fünf Menschen für ein Gesetz opfern'],'Entworfen von Philippa Foot (1967), variiert von Judith Jarvis Thomson.');
+MC('dl','Wer entwickelte ein Stufenmodell der Moralentwicklung und nutzte dafür das Heinz-Dilemma?','Lawrence Kohlberg',['Max Weber','John Stuart Mill','Hans Jonas'],'Kohlberg wertet die Begründung einer Antwort aus, nicht die Entscheidung.');
+TF('dl','Im Heinz-Dilemma überlegt Heinz, ein überteuertes Medikament für seine kranke Frau zu stehlen.',true,'Leben gegen Eigentum: ein klassischer Wertekonflikt.');
+MC('dl','Welche drei Ebenen unterscheidet Kohlberg?','präkonventionell, konventionell, postkonventionell',['egoistisch, sozial, religiös','kindlich, jugendlich, erwachsen','utilitaristisch, kantisch, christlich'],'Jede Ebene hat zwei Stufen, insgesamt also sechs.');
+MC('dl','Worauf kommt es Kohlberg bei der Einordnung einer Antwort an?','Auf die Begründung, nicht auf die Entscheidung',['Auf die Entscheidung, nicht auf die Begründung','Auf die Schnelligkeit der Antwort','Auf die Zustimmung der Gruppe'],'Zwei Menschen können gleich entscheiden, aber auf verschiedenen Stufen begründen.');
+TF('dl','In einem echten Dilemma gibt es immer eine Lösung ohne jeden moralischen Verlust.',false,'Sonst wäre es kein Dilemma.');
+MA('dl','Ordne jedem Dilemma seinen Kernkonflikt zu.',[['Trolley-Problem','Ein Leben gegen fünf Leben'],['Heinz-Dilemma','Eigentum gegen Lebensrettung'],['Notlüge (Kant)','Wahrheitspflicht gegen Schutz eines Verfolgten']],'Dilemmas zeigen, wie verschiedene Ethiken zu verschiedenen Urteilen kommen.');
+MC('dl','Das Prinzip der Doppelwirkung unterscheidet …','gewollte Wirkungen von bloß in Kauf genommenen Nebenwirkungen',['gute von schlechten Menschen','Absicht von Zufall bei Tätern','Pflichten von Neigungen'],'Es geht auf Thomas von Aquin zurück.');
+OR('dl','Ordne die Schritte beim Bearbeiten eines Dilemmas.',['Situation und Beteiligte beschreiben','Konfliktierende Werte benennen','Handlungsoptionen und Folgen prüfen','Mit ethischen Positionen begründen','Eigenes Urteil fällen'],'So wird aus Bauchgefühl ein begründetes Urteil.');
+/* Utilitarismus */
+MC('ut','Wer gilt als Begründer des klassischen Utilitarismus?','Jeremy Bentham',['Immanuel Kant','Max Weber','Hans Jonas'],'Bentham (1748–1832) und später John Stuart Mill.');
+MC('ut','Was ist das Grundprinzip des Utilitarismus?','Das größtmögliche Glück der größtmöglichen Zahl',['Handle nur nach Maximen, die allgemeines Gesetz werden können','Liebe deinen Nächsten wie dich selbst','Tue, was deine Gesinnung verlangt'],'„Utilis“ heißt nützlich: Es zählt der Gesamtnutzen.');
+MC('ut','Woran bemisst der Utilitarismus, ob eine Handlung gut ist?','An ihren Folgen',['An der Absicht','An göttlichen Geboten','An der Tradition'],'Utilitarismus ist eine Folgenethik (Konsequentialismus).');
+TF('ut','Der Utilitarismus ist eine teleologische, also zielorientierte Ethik.',true,'„Telos“ bedeutet Ziel: Eine Handlung ist gut, wenn sie das Ziel Glück fördert.');
+MC('ut','Wodurch unterscheidet sich Mill von Bentham?','Mill unterscheidet auch die Qualität der Freuden',['Mill lehnt Folgen als Maßstab ab','Mill setzt nur auf Pflichten','Mill bestreitet, dass Glück zählt'],'Geistige Freuden zählen für Mill mehr als bloß körperliche.');
+MC('ut','Welcher Satz stammt sinngemäß von John Stuart Mill?','Lieber ein unzufriedener Sokrates als ein zufriedener Narr',['Der Mensch ist zur Freiheit verurteilt','Ich denke, also bin ich','Handle so, dass du die Menschheit nie bloß als Mittel brauchst'],'Die anderen stammen von Sartre, Descartes und Kant.');
+MC('ut','Was prüft der Regelutilitarismus?','Welche Regel, allgemein befolgt, den größten Nutzen bringt',['Nur die einzelne Handlung im Moment','Ob die Handlung dem Gewissen entspricht','Ob Gott die Handlung gebietet'],'Der Handlungsutilitarismus prüft dagegen jede einzelne Handlung.');
+MC('ut','Welche Kritik wird am Utilitarismus häufig geäußert?','Minderheiten könnten für den Nutzen der Mehrheit geopfert werden',['Er ignoriert die Folgen von Handlungen','Er lässt nur göttliche Gebote gelten','Er verlangt blinden Gehorsam'],'Außerdem sind Folgen schwer vorherzusagen und Glück ist kaum messbar.');
+TF('ut','Nach Benthams Kalkül zählen unter anderem Intensität und Dauer einer Freude.',true,'Weitere Kriterien: Gewissheit, Nähe, Folgenreichtum, Reinheit, Ausmaß.');
+MA('ut','Ordne zu.',[['Hedonismus','Lust ist das höchste Gut'],['Konsequentialismus','Der moralische Wert liegt in den Folgen'],['Nutzenprinzip','Gut ist, was das Gesamtglück mehrt']],'Diese drei Begriffe bilden das Gerüst des Utilitarismus.');
+MC('ut','Eine Lüge nützt vielen, die Wahrheit schadet vielen. Was folgt für den Utilitaristen?','Er wägt die Folgen ab; die Lüge kann erlaubt sein',['Er verbietet jede Lüge ausnahmslos','Er fragt nur, ob die Maxime verallgemeinerbar ist','Er schlägt in der Bibel nach'],'Beim Utilitarismus gibt es keine Handlung, die an sich verboten ist.');
+MC('ut','Welcher Denker vertritt den Präferenzutilitarismus?','Peter Singer',['Jeremy Bentham','Immanuel Kant','Dietrich Bonhoeffer'],'Dort zählt die Erfüllung der Interessen und Wünsche der Betroffenen.');
+
+/* Pflichtethik nach Kant */
+MC('kp','Was ist für Kant das einzige uneingeschränkt Gute?','Der gute Wille',['Das Glück','Der Erfolg einer Handlung','Der Gehorsam'],'Grundlegung zur Metaphysik der Sitten (1785).');
+MC('kp','Was bedeutet „deontologisch“?','Pflichtbezogen (griech. deon = Pflicht)',['Folgenbezogen','Gottbezogen','Tugendbezogen'],'Kants Ethik fragt nach der Pflicht, nicht nach den Folgen.');
+TF('kp','Nach Kant bestimmt vor allem der Erfolg einer Handlung ihren moralischen Wert.',false,'Entscheidend ist das Motiv, aus dem gehandelt wird.');
+MC('kp','Ein Händler behandelt Kunden nur ehrlich, weil Betrug sein Geschäft ruinieren würde. Das ist für Kant …','pflichtgemäß, aber nicht aus Pflicht',['aus Pflicht und daher moralisch wertvoll','unmoralisch','ein Fall von gutem Willen'],'Moralischen Wert hat nur das Handeln aus Pflicht.');
+MC('kp','Wo liegt für Kant der moralische Wert einer Handlung?','In der Maxime, aus der sie geschieht',['In den Folgen','In der Tradition der Gesellschaft','Im Beifall der anderen'],'Darum gilt Kants Ethik als Gesinnungsethik.');
+MC('kp','Was meint Kant mit „Autonomie“?','Die Vernunft gibt sich selbst das moralische Gesetz',['Gehorsam gegenüber der Kirche','Unabhängigkeit von allen Regeln','Handeln nach Neigung'],'Moralisch ist, was die eigene Vernunft als allgemeines Gesetz einsieht.');
+MC('kp','Wann ist ein Imperativ „hypothetisch“?','Wenn er nur unter einer Bedingung gilt („Wenn du X willst, tu Y“)',['Wenn er unbedingt für alle gilt','Wenn er von Gott stammt','Wenn er von Folgen absieht'],'Der Kategorische Imperativ dagegen gilt unbedingt.');
+MC('kp','Wo lebte und lehrte Kant sein Leben lang?','Königsberg',['Wien','Weimar','Berlin'],'Immanuel Kant lebte von 1724 bis 1804.');
+TF('kp','Kant ist ein Vertreter der Gesinnungsethik.',true,'Für ihn zählt die Gesinnung (die Maxime), nicht das Ergebnis.');
+MA('kp','Ordne die Begriffe Kants zu.',[['Neigung','Gefühl oder Wunsch, der zum Handeln drängt'],['Pflicht','Notwendigkeit einer Handlung aus Achtung vor dem Gesetz'],['Maxime','Subjektiver Grundsatz des eigenen Wollens']],'Moralisch handelt, wer aus Pflicht handelt, nicht aus bloßer Neigung.');
+MC('kp','Warum gilt Kants Ethik als „rigoristisch“?','Sie lässt kaum Ausnahmen zu, auch wenn die Folgen schlimm wären',['Sie erlaubt jede Handlung','Sie zählt nur Folgen','Sie lehnt die Vernunft ab'],'Kritiker verweisen etwa auf den Konflikt zwischen Pflichten.');
+/* Kategorischer Imperativ */
+MC('ki','Welche Formulierung ist die Grundformel des Kategorischen Imperativs?','Handle nur nach derjenigen Maxime, durch die du zugleich wollen kannst, dass sie ein allgemeines Gesetz werde',['Handle so, dass der größte Nutzen für alle entsteht','Tue anderen, was du von ihnen erwartest','Handle so, dass du die Folgen verantworten kannst'],'Das ist die Universalisierungsformel.');
+MC('ki','Was bedeutet „kategorisch“?','Unbedingt, ohne „Wenn“ gültig',['Nur für Gläubige gültig','Abhängig von den Folgen','Nur für Herrscher gültig'],'Der Imperativ gilt, unabhängig von Wünschen oder Zielen.');
+MC('ki','Die Selbstzweckformel besagt …','Menschen nie bloß als Mittel, sondern zugleich als Zweck behandeln',['Der Zweck heiligt die Mittel','Jeder soll nach dem eigenen Vorteil streben','Man soll Zwecke vermeiden'],'Sie gründet auf der Würde jedes Menschen.');
+TF('ki','Nach der Selbstzweckformel darf man andere nicht bloß als Mittel gebrauchen.',true,'Wer ein Taxi nimmt, nutzt den Fahrer als Mittel, achtet aber seine Würde.');
+MC('ki','Wer ein Versprechen gibt, das er nicht halten will, um Geld zu bekommen, verstößt gegen den KI, weil …','diese Maxime nicht verallgemeinerbar ist: Versprechen würden sinnlos',['dadurch jemand Schaden nimmt','es ein Gesetz verbietet','Gott es verboten hat'],'Kants bekanntes Beispiel des falschen Versprechens.');
+TF('ki','Der Kategorische Imperativ nennt konkrete Handlungsanweisungen wie „Gib Almosen“.',false,'Er ist ein formales Prüfverfahren für Maximen, keine Liste von Geboten.');
+OR('ki','So prüfst du eine Maxime mit dem Kategorischen Imperativ. Bringe die Schritte in Reihenfolge.',['Die eigene Maxime formulieren','Die Maxime als allgemeines Gesetz denken','Prüfen, ob ein Widerspruch entsteht','Urteilen: erlaubt oder verboten'],'Entsteht ein Widerspruch, ist die Maxime nicht verallgemeinerbar.');
+MC('ki','Welche Formel spricht vom „Reich der Zwecke“?','Die Autonomieformel',['Die Goldene Regel','Das Nutzenprinzip','Das Gebot der Nächstenliebe'],'Alle Vernunftwesen geben sich gemeinsam Gesetze, die jede Person als Zweck achten.');
+MC('ki','Worin unterscheidet sich der KI von der Goldenen Regel?','Er prüft die Verallgemeinerbarkeit, nicht persönliche Wünsche',['Er lässt Folgen entscheiden','Er stammt aus der Bibel','Er gilt nur für Christen'],'Die Goldene Regel fragt: „Was wünsche ich mir?“ Der KI fragt: „Kann das für alle gelten?“');
+MC('ki','Welche Position vertritt Kant im Streit um die „Notlüge“ gegenüber einem Mörder?','Auch hier darf man nicht lügen',['Hier ist Lügen geboten, weil Leben wichtiger ist','Er entscheidet nach dem Nutzen','Er überlässt es dem Gefühl'],'Aufsatz „Über ein vermeintes Recht aus Menschenliebe zu lügen“ (1797).');
+MC('ki','Die Naturgesetzformel fordert sinngemäß …','Handle so, als ob deine Maxime durch deinen Willen zum allgemeinen Naturgesetz werden sollte',['Folge immer der Natur','Handle so, dass die Natur geschützt bleibt','Tu, was alle tun'],'Sie ist eine Variante der Universalisierungsformel.');
+MA('ki','Ordne zu.',[['Universalisierungsformel','Kann meine Maxime ein allgemeines Gesetz sein?'],['Selbstzweckformel','Behandle Menschen nie bloß als Mittel'],['Hypothetischer Imperativ','Wenn du dein Ziel willst, dann tu …']],'Nur die ersten beiden sind Formeln des kategorischen Imperativs.');
+/* Christliche Ethik */
+MC('ch','Wie lautet das Doppelgebot der Liebe?','Gott lieben und den Nächsten wie sich selbst',['Auge um Auge, Zahn um Zahn','Du sollst nicht töten und nicht stehlen','Liebe deine Familie mehr als Fremde'],'Mk 12,28–31; es fasst für Jesus das Gesetz zusammen.');
+MC('ch','Welches Gleichnis erzählt Jesus auf die Frage „Wer ist mein Nächster?“','Der barmherzige Samariter',['Der verlorene Sohn','Der Sämann','Die klugen und törichten Jungfrauen'],'Lk 10,25–37: Nächster ist, wer meine Hilfe braucht.');
+MC('ch','Wo steht die Aufforderung zur Feindesliebe?','In der Bergpredigt',['In den Zehn Geboten','Im Buch Genesis','In der Offenbarung des Johannes'],'Mt 5,44: „Liebt eure Feinde.“');
+TF('ch','Die Zehn Gebote (Dekalog) gehören zur Grundlage christlicher Ethik.',true,'Ex 20 und Dtn 5; sie sind auch im Judentum grundlegend.');
+MC('ch','Was bedeutet die Gottebenbildlichkeit des Menschen (Gen 1,27) für die Ethik?','Jeder Mensch besitzt eine unantastbare Würde',['Menschen sind Götter','Nur Gläubige haben Würde','Menschen dürfen über die Schöpfung beliebig verfügen'],'Daraus wird die Menschenwürde christlich begründet.');
+MC('ch','Die Goldene Regel in Mt 7,12 lautet sinngemäß …','Alles, was ihr von anderen erwartet, das tut auch ihnen',['Handle nur nach allgemeinen Gesetzen','Das größte Glück der größten Zahl','Man soll nur Folgen verantworten'],'Jesus nennt sie „das Gesetz und die Propheten“.');
+MC('ch','Worin liegt die Begründung christlicher Ethik?','Im Glauben an Gott, der den Menschen zuerst liebt',['Allein im Nutzenkalkül','Allein in der Vernunft ohne Glauben','In kulturellen Gewohnheiten'],'Ethisches Handeln ist Antwort auf Gottes Zuwendung.');
+MA('ch','Ordne die Bibelstelle ihrem Inhalt zu.',[['Ex 20 / Dtn 5','Zehn Gebote'],['Mt 5–7','Bergpredigt mit Seligpreisungen'],['Lk 10,25–37','Barmherziger Samariter']],'Diese Stellen prägen die christliche Ethik bis heute.');
+TF('ch','Nach Mt 25 versteht Jesus Hilfe für Hungrige und Fremde als Dienst an ihm selbst.',true,'„Was ihr einem meiner geringsten Brüder getan habt, das habt ihr mir getan.“');
+MC('ch','Wofür steht „Barmherzigkeit“?','Mitleid, das tatkräftig hilft',['Strenge Bestrafung','Gehorsam gegenüber Regeln','Streben nach Reichtum'],'Der Samariter zeigt: Barmherzigkeit wird zur Tat.');
+MC('ch','Wie begründet die reformatorische Theologie (Paulus, Luther) die Rechtfertigung?','Allein aus Gnade durch den Glauben; gute Taten folgen daraus',['Allein durch eigene Werke','Allein durch Erfolg','Durch Herkunft'],'Gute Werke sind Frucht des Glaubens, nicht Voraussetzung.');
+/* Verantwortungsethik */
+MC('ve','Wer unterschied Gesinnungs- und Verantwortungsethik?','Max Weber',['Hans Jonas','Immanuel Kant','Jeremy Bentham'],'Vortrag „Politik als Beruf“ (1919).');
+MC('ve','Was verlangt die Verantwortungsethik nach Weber?','Für die voraussehbaren Folgen des eigenen Handelns einzustehen',['Nur die reine Absicht zählt','Nur Gottes Gebote zählen','Folgen sind unwichtig'],'Wer verantwortungsethisch handelt, rechnet mit den Folgen.');
+MC('ve','Wer schrieb „Das Prinzip Verantwortung“ (1979)?','Hans Jonas',['Max Weber','Peter Singer','Jeremy Bentham'],'Jonas reagiert auf die Macht der modernen Technik.');
+MC('ve','Welcher Imperativ stammt von Hans Jonas?','Handle so, dass die Wirkungen deiner Handlung verträglich sind mit der Permanenz echten menschlichen Lebens auf Erden',['Handle nur nach verallgemeinerbaren Maximen','Strebe nach dem größten Glück der Mehrzahl','Liebe deinen Nächsten'],'Er schützt die Zukunft der Menschheit.');
+TF('ve','Jonas bezieht auch zukünftige Generationen und die Natur in die Verantwortung ein.',true,'Das nennt man Zukunfts- oder Fernstenverantwortung.');
+MC('ve','Warum fordert Jonas eine neue Ethik?','Die moderne Technik hat Macht mit weitreichenden, oft unumkehrbaren Folgen geschaffen',['Alte Ethiken sind zu streng','Gefühle zählen nicht','Technik ist immer schlecht'],'Unsere Handlungen reichen räumlich und zeitlich viel weiter als früher.');
+MC('ve','Was meint Jonas mit der „Heuristik der Furcht“?','Mögliche Katastrophen sollen als Warnung dienen, bevor wir handeln',['Man soll sich vor anderen fürchten','Furcht ist die Grundlage der Moral','Man soll Risiken ignorieren'],'Im Zweifel hat die schlechte Prognose Vorrang.');
+MC('ve','Ein Gesinnungsethiker im Sinne Webers …','fühlt sich für die Reinheit seiner Gesinnung verantwortlich, weniger für die Folgen',['rechnet jede Folge durch','verzichtet auf Überzeugungen','handelt nur nach Nutzen'],'Der Verantwortungsethiker bedenkt dagegen die absehbaren Folgen.');
+TF('ve','Verantwortung fragt immer: Wer ist wofür gegenüber wem verantwortlich?',true,'Subjekt, Gegenstand und Instanz gehören zur Verantwortung.');
+MA('ve','Ordne zu.',[['Gesinnungsethik','Der Wert liegt in der Absicht'],['Verantwortungsethik','Folgen müssen bedacht und verantwortet werden'],['Zukunftsverantwortung','Sorge um das Leben kommender Generationen']],'Weber betont: Beide Haltungen müssen sich ergänzen.');
+MC('ve','Welche Aussage passt zur Verantwortungsethik?','Wer handelt, muss die erwartbaren Folgen bedenken und dafür einstehen',['Folgen gehen mich nichts an, solange meine Absicht rein ist','Verantwortung gibt es nur gegenüber Gott','Verantwortung trägt immer die Gruppe'],'Verantwortung heißt, für das eigene Tun Rede und Antwort zu stehen.');
+/* Ethiken im Vergleich */
+var E4=['Utilitarismus','Pflichtethik nach Kant','Christliche Ethik','Verantwortungsethik'];
+function WHO(q,i,ex){var w=E4.filter(function(_,k){return k!==i});MC('mx','Welche Ethik spricht hier? '+q,E4[i],w,ex)}
+WHO('„Ich lüge nie, selbst wenn es nützen würde. Die Wahrheitspflicht gilt immer.“',1,'Kant: Pflichten gelten unbedingt.');
+WHO('„Ich wäge ab, welche Handlung den größten Gesamtnutzen schafft.“',0,'Kernidee des Utilitarismus.');
+WHO('„Der Mensch in Not ist mein Nächster. Aus Liebe und Barmherzigkeit helfe ich ihm.“',2,'Doppelgebot der Liebe, Samaritergleichnis.');
+WHO('„Ich bedenke die Fernwirkungen meines Handelns auf kommende Generationen und trage dafür Verantwortung.“',3,'Hans Jonas: Prinzip Verantwortung.');
+WHO('„Menschen dürfen nie bloß als Mittel benutzt werden, egal wie groß der Nutzen für andere wäre.“',1,'Selbstzweckformel des Kategorischen Imperativs.');
+WHO('„Jeder Mensch ist Ebenbild Gottes. Darum schütze ich besonders die Schwachen.“',2,'Menschenwürde aus der Gottebenbildlichkeit.');
+WHO('„Wer handelt, muss die voraussehbaren Folgen verantworten, nicht nur seine Absicht rechtfertigen.“',3,'Max Weber: Verantwortungsethik.');
+MA('mx','Ordne jeder Ethik ihre Leitfrage zu.',[['Utilitarismus','Was nützt dem Gesamtglück am meisten?'],['Pflichtethik','Kann ich wollen, dass alle so handeln?'],['Christliche Ethik','Was verlangt die Liebe zu Gott und zum Nächsten?'],['Verantwortungsethik','Welche Folgen hat mein Handeln, und wer trägt sie?']],'Im Fallbeispiel hilft es, jede Leitfrage nacheinander zu stellen.');
+MC('mx','Welche dieser Ethiken beurteilt Handlungen ausschließlich nach ihren Folgen?','Utilitarismus',['Pflichtethik nach Kant','Christliche Ethik','Gesinnungsethik'],'Kant und die Gesinnungsethik fragen nach Pflicht und Motiv.');
+TF('mx','Kants Ethik und der Utilitarismus kommen bei einer Notlüge zum selben Urteil.',false,'Kant verbietet die Lüge, der Utilitarismus kann sie erlauben.');
+/* ---------- Boss-Fallbeispiele ---------- */
+var CASES=[
+{t:'Das Elixier der Alchemistin',s:'In Nebelhain liegt Lyra, die Frau des Schmieds Torin, im Sterben. Nur ein Elixier der Alchemistin Vesper kann sie retten. Vesper verlangt 500 Goldstücke, das Zehnfache ihrer Kosten. Torin besitzt nur 50. Verzweifelt erwägt er, in Vespers Laden einzubrechen. Ohne Einnahmen müsste Vesper ihre Werkstatt aufgeben, in der sie auch andere Kranke versorgt.',va:'Torin stiehlt das Elixier.',vb:'Torin sucht einen anderen Weg.',
+ L:[['ut','Er vergleicht Nutzen (Lyras Leben) und Schaden (Vespers Verlust, schwindende Versorgung anderer); der größere Gesamtnutzen entscheidet.','Diebstahl ist immer verboten, egal was dabei herauskommt.','Jeder Mensch ist Ebenbild Gottes, darum darf Torin nichts anderes erwägen.'],
+ ['kp','Die Maxime „Ich stehle, wenn ich in Not bin“ lässt sich nicht als allgemeines Gesetz wollen; Eigentum würde sinnlos.','Entscheidend ist, dass am Ende mehr Menschen glücklich sind.','Er muss vor allem die Folgen für kommende Generationen bedenken.'],
+ ['ch','Nächstenliebe verpflichtet beide: Vesper zur Barmherzigkeit, Torin zu einem Weg ohne Unrecht. Not verlangt Hilfe, auch für Arme.','Nur das Nutzenkalkül zählt; Gefühle sind unwichtig.','Nur die Maxime zählt; Mitleid darf keine Rolle spielen.'],
+ ['ve','Torin muss die absehbaren Folgen verantworten: für Vesper, ihre Patienten und das Vertrauen im Dorf.','Er folgt allein seiner Pflicht, unabhängig von den Folgen.','Er richtet sich allein nach dem Gebot der Feindesliebe.']]},
+{t:'Die Weiche am Rabenpass',s:'Ein außer Kontrolle geratener Erzwagen rast den Rabenpass hinab auf fünf Bergleute zu. Du stehst an einer Weiche. Stellst du sie um, rollt der Wagen auf ein Nebengleis, auf dem ein einzelner Bergmann arbeitet. Niemand kann mehr gewarnt werden.',va:'Du stellst die Weiche um.',vb:'Du lässt den Wagen laufen.',
+ L:[['ut','Fünf Leben wiegen mehr als eines: Das Umstellen der Weiche maximiert das Gesamtwohl.','Man darf den Einzelnen nie bloß als Mittel für die anderen gebrauchen.','Nicht eingreifen, denn man darf nicht töten, egal was folgt.'],
+ ['kp','Der Einzelne darf nicht bloß als Mittel zur Rettung anderer dienen; Menschenwürde lässt sich nicht verrechnen.','Entscheidend ist allein die Zahl der Geretteten.','Der Weg ergibt sich aus der Abwägung aller Folgen.'],
+ ['ch','Jedes Leben ist als Ebenbild Gottes gleich wertvoll und darf nicht gegen ein anderes verrechnet werden; es bleibt eine Gewissensfrage.','Das Glück der Mehrheit entscheidet.','Entscheidend ist allein, ob die Maxime verallgemeinerbar ist.'],
+ ['ve','Wer an der Weiche steht, trägt Verantwortung für beide Wege: Eingreifen und Unterlassen haben Folgen, die er verantworten muss.','Nur die Absicht zählt, nicht das Ergebnis.','Nur das Gebot „Du sollst nicht töten“ zählt, nicht die Lage.']]},
+{t:'Der Wettermagier von Sonnental',s:'Der Wettermagier Orin kann den Regen zehn Jahre lang über das Tal lenken. Die Ernten würden sich verdoppeln und die Hungersnot enden. Sein Zauber würde aber die Quellen der Nachbartäler langsam austrocknen, und niemand weiß, ob er sich später rückgängig machen lässt.',va:'Orin wirkt den Zauber.',vb:'Orin verzichtet auf den Zauber.',
+ L:[['ut','Er müsste Nutzen und Schaden aller Betroffenen gegeneinander rechnen, auch den der Nachbartäler; die Prognose bleibt unsicher.','Entscheidend ist, ob er den Zauber aus Pflicht wirkt.','Er muss sich fragen, was Gott gebietet.'],
+ ['kp','Er prüft: Kann ich wollen, dass jeder Mächtige fremde Lebensgrundlagen für den eigenen Vorteil ändert? Die Maxime ist nicht verallgemeinerbar.','Er zählt nur die Ernte des ganzen Tals.','Er prüft vor allem Zukunftsfolgen und Unumkehrbarkeit.'],
+ ['ch','Bewahrung der Schöpfung und Nächstenliebe: Auch die Nachbarn sind Nächste, die Schöpfung ist anvertraut, nicht verfügbar.','Nur der Ertrag für die meisten zählt.','Nur die Verallgemeinerbarkeit zählt.'],
+ ['ve','Bei unumkehrbaren, unsicheren Folgen gilt Vorsicht (Jonas): Der Fortbestand echten Lebens hat Vorrang vor dem Gewinn.','Das Gebot der Wahrhaftigkeit entscheidet.','Der größte Gesamtnutzen heute entscheidet.']]},
+{t:'Der Verfolgte im Keller',s:'Wachen des Barons klopfen an deine Tür. Sie suchen den Heiler Calen, den der Baron wegen einer unbequemen Wahrheit festnehmen lassen will. Calen versteckt sich in deinem Keller. Der Hauptmann fragt: „Ist er hier?“ Du kannst die Wahrheit sagen, schweigen oder lügen.',va:'Du lügst, um Calen zu schützen.',vb:'Du sagst die Wahrheit.',
+ L:[['ut','Die Lüge rettet ein Leben und schadet kaum; der Gesamtnutzen spricht für die Lüge.','Eine Lüge ist nie erlaubt, weil Wahrhaftigkeit unbedingt gilt.','Er fragt, welche Folgen für kommende Generationen entstehen.'],
+ ['kp','Nach Kants Schrift zur Notlüge ist Lügen auch hier nicht erlaubt: Die Lügenmaxime ließe sich nicht verallgemeinern.','Das Leben des Heilers wiegt schwerer, daher ist Lügen geboten.','Die Mehrheit der Dorfbewohner würde die Lüge billigen.'],
+ ['ch','Das Gebot, nicht falsch Zeugnis zu reden, schützt den Nächsten; Schutz des Bedrängten kann Vorrang vor wörtlicher Wahrheit haben.','Maßgeblich ist die Verallgemeinerbarkeit der Maxime.','Maßgeblich sind allein die berechneten Folgen für die meisten.'],
+ ['ve','Er bedenkt die absehbaren Folgen für Calen, sich selbst und seine Familie und trägt die Verantwortung für sein Handeln und dessen Preis.','Er folgt allein seiner Gesinnung, egal was geschieht.','Er zählt, wie viele Menschen sich freuen.']]},
+{t:'Die letzten Heiltränke',s:'In der Stadt Aschenfurt wütet eine Seuche. Es gibt nur zehn Heiltränke für zwanzig Kranke. Darunter sind eine junge Heilerin, die viele weitere retten könnte, ein alter Bettler und die Tochter des Bürgermeisters. Du leitest das Heilhaus und musst entscheiden, wer die Tränke bekommt.',va:'Nach größtem Nutzen verteilen (z. B. die Heilerin zuerst).',vb:'Das Los entscheidet, alle haben gleiche Chancen.',
+ L:[['ut','Die Tränke gehen dorthin, wo sie das meiste Leid verhindern, etwa zur Heilerin, die weitere Kranke retten kann.','Alle Kranken haben gleiche Würde; keiner darf nach Nutzen aussortiert werden.','Wer für die Schwachen eintritt, gibt zuerst dem Bettler.'],
+ ['kp','Niemand darf bloß als Mittel für den Nutzen anderer behandelt werden; Würde kennt keinen Preis. Daher zählen faire Regeln wie das Los.','Die Tränke gehen dorthin, wo die Gesamtbilanz am besten ist.','Wer den höchsten Rang hat, soll gerettet werden.'],
+ ['ch','Gleiche Würde als Ebenbilder Gottes und Vorrang für die Schwächsten (Mt 25): Der Bettler darf nicht übergangen werden.','Nur der erwartete Nutzen zählt.','Nur die Verallgemeinerbarkeit der Regel zählt.'],
+ ['ve','Er muss die Folgen jeder Regel bedenken, für Vertrauen, Unruhen und die Zukunft der Stadt, und die Entscheidung öffentlich verantworten.','Er folgt allein dem Pflichtgefühl, egal was daraus folgt.','Er folgt allein der Goldenen Regel.']]},
+{t:'Das Geheimnis des Schatzmeisters',s:'Als Schreiber der Königin entdeckst du, dass der Schatzmeister Gelder des Reiches unterschlägt. Machst du es öffentlich, drohen Aufstände und der Sturz der Königin, die sonst gerecht regiert. Schweigst du, leiden die Armen weiter unter höheren Steuern, und du machst dich mitschuldig.',va:'Du machst den Betrug öffentlich.',vb:'Du schweigst vorerst.',
+ L:[['ut','Er wägt Aufstand und Chaos gegen die Entlastung der Armen und wählt, was das Gesamtwohl langfristig mehrt, vielleicht erst einen leisen Hinweis.','Wahrheit und Gerechtigkeit sind unbedingte Pflicht, egal wie die Folgen sind.','Er prüft, ob jeder Mensch als Ebenbild Gottes behandelt wird.'],
+ ['kp','Die Maxime, Unrecht zu verschweigen, wenn es unbequem ist, lässt sich nicht verallgemeinern; Rechtlichkeit und Ehrlichkeit gelten unbedingt.','Er zählt nur den Gesamtnutzen.','Er fragt nach den Fernwirkungen auf kommende Generationen.'],
+ ['ch','Einsatz für Gerechtigkeit und die Armen (Propheten, Mt 25), zugleich Barmherzigkeit und Friedensliebe bei der Art des Vorgehens.','Nur der Nutzen zählt.','Nur die Maxime zählt.'],
+ ['ve','Er trägt Verantwortung fürs Aufdecken wie fürs Schweigen: Wirkung, Zeitpunkt, Weg und Schutz der Beteiligten müssen bedacht werden.','Er handelt allein aus reiner Gesinnung.','Er rechnet nur das Glück der meisten aus.']]}
+];
+var TIPS=['Moral beschreibt, was in einer Gruppe als richtig gilt. Ethik denkt darüber nach.','Normen sagen, was getan werden soll. Werte erklären, warum.','Ein Dilemma hat keine Lösung ohne moralischen Preis.','Kohlberg wertet die Begründung einer Antwort aus, nicht die Entscheidung.','Bentham fragte: Wie viel Glück entsteht? Mill fragte auch: Welche Qualität hat es?','Utilitarismus kommt von „utilis“, dem lateinischen Wort für nützlich.','Für Kant zählt nur der gute Wille uneingeschränkt als gut.','Handeln „aus Pflicht“ ist mehr als nur „pflichtgemäß“ zu handeln.','Der Kategorische Imperativ ist ein Prüfverfahren, keine Regelliste.','Kants Selbstzweckformel: Menschen nie bloß als Mittel gebrauchen.','Kategorisch heißt unbedingt, ohne „Wenn“.','Die Goldene Regel fragt nach meinen Wünschen, der Kategorische Imperativ nach Verallgemeinerbarkeit.','Das Doppelgebot der Liebe fasst für Jesus das ganze Gesetz zusammen.','Der barmherzige Samariter beantwortet die Frage „Wer ist mein Nächster?“.','Menschenwürde heißt christlich: Jeder Mensch ist Ebenbild Gottes.','Max Weber: Der Verantwortungsethiker steht für die voraussehbaren Folgen ein.','Hans Jonas schrieb 1979 „Das Prinzip Verantwortung“ als Antwort auf die moderne Technik.','Verantwortung fragt: Wer? Wofür? Wem gegenüber?','Im Fallbeispiel hilft es, jede Ethik nacheinander zu befragen.','Der Utilitarismus kann Minderheiten benachteiligen, darauf zielt eine Hauptkritik.','Kants Kritiker nennen seine Ethik rigoristisch, denn sie lässt kaum Ausnahmen zu.','Relativismus: Moral hängt von Kultur und Zeit ab. Universalismus: Manche Normen gelten überall.','Der Sein-Sollen-Fehlschluss folgert aus dem, was ist, was sein soll.','Gute Entscheidungen brauchen Informationen, Alternativen und eine Prüfung der Folgen.','Autonomie heißt Selbstgesetzgebung: Man bindet sich aus Einsicht an Normen.'];
+
+/* ---------- Das Buch der Weisheit ---------- */
+var BOOK=[
+{t:'Die vier Ethiken im Überblick',h:'<h2>Vier Ethiken im Überblick</h2><p class="muted">Diese Tabelle brauchst du für jedes Fallbeispiel.</p><div class="scrollx"><table><tr><th></th><th>Utilitarismus</th><th>Pflichtethik (Kant)</th><th>Christliche Ethik</th><th>Verantwortungsethik</th></tr><tr><th>Leitfrage</th><td>Was nützt dem Gesamtglück am meisten?</td><td>Kann ich wollen, dass alle so handeln?</td><td>Was verlangt die Liebe zu Gott und zum Nächsten?</td><td>Welche Folgen hat mein Handeln, und wer trägt sie?</td></tr><tr><th>Maßstab</th><td>Folgen, Nutzen</td><td>Pflicht, Maxime, gute Absicht</td><td>Gebot der Liebe, Menschenwürde</td><td>Absehbare Folgen und Zukunft</td></tr><tr><th>Typ</th><td>teleologisch, Folgenethik</td><td>deontologisch, Gesinnungsethik</td><td>Glaubensethik, Gebots- und Liebesethik</td><td>Folgen- und Verantwortungsethik</td></tr><tr><th>Stärke</th><td>Berücksichtigt alle Betroffenen</td><td>Schützt die Würde des Einzelnen</td><td>Betont Barmherzigkeit und Nähe</td><td>Denkt an Fernwirkungen</td></tr><tr><th>Kritik</th><td>Minderheiten können geopfert werden</td><td>Rigoristisch, wenig Ausnahmen</td><td>Setzt Glauben voraus, Gebote können kollidieren</td><td>Folgen sind schwer vorherzusehen</td></tr></table></div>'},
+{t:'Normen, Werte, Moral',h:'<h2>Normen, Werte, Moral, Ethik</h2><h3>Begriffe</h3><ul><li><b>Wert</b>: Vorstellung vom Wünschenswerten (Freiheit, Gerechtigkeit, Leben).</li><li><b>Norm</b>: Handlungsregel, die einen Wert konkretisiert („Du sollst nicht stehlen“).</li><li><b>Moral</b>: die tatsächlich gelebten Werte und Normen einer Gruppe.</li><li><b>Ethik</b>: wissenschaftliche Reflexion über Moral und ihre Begründung.</li><li><b>Gewissen</b>: innere Instanz, die eigenes Handeln bewertet.</li></ul><h3>Wichtig</h3><ul><li><b>Deskriptiv</b> beschreibt, was ist; <b>normativ</b> fordert, was sein soll.</li><li><b>Sein-Sollen-Fehlschluss</b>: Aus „es ist so“ folgt nicht „es soll so sein“.</li><li><b>Relativismus</b>: Moral hängt von Kultur, Zeit oder Person ab. <b>Universalismus</b>: Es gibt allgemein gültige Normen.</li><li><b>Autonomie</b>: Selbstgesetzgebung; <b>Heteronomie</b>: Fremdbestimmung.</li><li><b>Goldene Regel</b>: Was du nicht willst, dass man dir tu, das füg auch keinem andern zu.</li></ul><h3>Entscheidungsschritte</h3><p>Problem klären, Informationen sammeln, Alternativen entwickeln, Folgen und Werte abwägen, entscheiden und überprüfen.</p>'},
+{t:'Dilemmas',h:'<h2>Dilemmas</h2><p>Ein <b>moralisches Dilemma</b> ist eine Zwangslage: Es gibt mehrere Handlungsmöglichkeiten, doch bei jeder wird ein wichtiger Wert verletzt.</p><h3>Klassiker</h3><ul><li><b>Trolley-Problem</b> (Philippa Foot, 1967; Variante von Judith Jarvis Thomson): Ein Leben gegen fünf Leben.</li><li><b>Heinz-Dilemma</b> (Lawrence Kohlberg): Darf Heinz ein Medikament stehlen, um seine Frau zu retten?</li><li><b>Notlüge</b>: Darf man einen Mörder anlügen, um einen Freund zu schützen? (Kant sagt: nein.)</li></ul><h3>Kohlberg</h3><ul><li>Drei Ebenen: <b>präkonventionell</b>, <b>konventionell</b>, <b>postkonventionell</b>, jeweils zwei Stufen.</li><li>Ausgewertet wird die <b>Begründung</b>, nicht die Entscheidung.</li></ul><h3>Doppelwirkung</h3><p>Gewollte Wirkung und in Kauf genommene Nebenwirkung unterscheiden sich moralisch (Thomas von Aquin).</p><h3>Vorgehen</h3><p>Situation beschreiben, Werte benennen, Optionen und Folgen prüfen, mit Ethiken begründen, Urteil fällen.</p>'},
+{t:'Utilitarismus',h:'<h2>Utilitarismus</h2><p class="q">Das größtmögliche Glück der größtmöglichen Zahl.</p><h3>Kern</h3><ul><li>Begründer: <b>Jeremy Bentham</b> (1748 bis 1832); weiter entwickelt von <b>John Stuart Mill</b> (1806 bis 1873).</li><li><b>Teleologisch</b> und <b>konsequentialistisch</b>: Eine Handlung ist gut, wenn ihre Folgen den Gesamtnutzen mehren.</li><li><b>Hedonismus</b>: Glück bedeutet Lust und Abwesenheit von Leid.</li><li>Bentham: <b>Kalkül</b> (Intensität, Dauer, Gewissheit, Nähe, Folgenreichtum, Reinheit, Ausmaß).</li><li>Mill: auch die <b>Qualität</b> zählt. „Lieber ein unzufriedener Sokrates als ein zufriedener Narr.“</li></ul><h3>Formen</h3><ul><li><b>Handlungsutilitarismus</b>: Jede einzelne Handlung wird geprüft.</li><li><b>Regelutilitarismus</b>: Es zählen Regeln, die allgemein den größten Nutzen bringen.</li><li><b>Präferenzutilitarismus</b> (Peter Singer): Interessen der Betroffenen zählen.</li></ul><h3>Kritik</h3><ul><li>Minderheiten können geopfert werden, Gerechtigkeit gerät aus dem Blick.</li><li>Folgen sind schwer vorherzusagen, Glück ist kaum messbar.</li></ul>'},
+{t:'Kants Pflichtethik',h:'<h2>Kants Pflichtethik</h2><p>Immanuel Kant (1724 bis 1804, Königsberg). Hauptwerk zur Ethik: <i>Grundlegung zur Metaphysik der Sitten</i> (1785).</p><h3>Kern</h3><ul><li><b>Deontologisch</b>: Maßstab ist die Pflicht, nicht die Folge.</li><li><b>Guter Wille</b>: das einzige uneingeschränkt Gute.</li><li>Handeln <b>aus Pflicht</b> hat moralischen Wert; <b>pflichtgemäß</b> (aus Eigennutz) reicht nicht.</li><li><b>Maxime</b>: subjektiver Grundsatz des Wollens. Hier liegt der Wert der Handlung.</li><li><b>Neigung</b>: Gefühle und Wünsche; sie sind nicht der Maßstab.</li><li><b>Autonomie</b>: Die Vernunft gibt sich selbst das Sittengesetz.</li><li>Darum: <b>Gesinnungsethik</b>.</li></ul><h3>Kritik</h3><ul><li>Rigoristisch: kaum Ausnahmen, selbst bei schlimmen Folgen.</li><li>Pflichten können kollidieren; die Notlüge-Frage bleibt umstritten.</li></ul>'},
+{t:'Kategorischer Imperativ',h:'<h2>Der Kategorische Imperativ</h2><p><b>Kategorisch</b> = unbedingt. Der <b>hypothetische</b> Imperativ gilt nur bedingt („Wenn du X willst, tu Y“).</p><h3>Formeln</h3><p class="q">Universalisierung: „Handle nur nach derjenigen Maxime, durch die du zugleich wollen kannst, dass sie ein allgemeines Gesetz werde.“</p><p class="q">Naturgesetz: „Handle so, als ob die Maxime deiner Handlung durch deinen Willen zum allgemeinen Naturgesetze werden sollte.“</p><p class="q">Selbstzweck: „Handle so, dass du die Menschheit … jederzeit zugleich als Zweck, niemals bloß als Mittel brauchst.“</p><p>Dazu: <b>Autonomieformel</b> (Reich der Zwecke).</p><h3>Prüfverfahren</h3><ul><li>Maxime formulieren.</li><li>Als allgemeines Gesetz denken.</li><li>Widerspruch? Dann ist sie verboten.</li></ul><h3>Beispiele</h3><ul><li>Falsches Versprechen: nicht verallgemeinerbar, Versprechen würden sinnlos.</li><li>Lügen aus Menschenliebe: Kant lehnt auch die Notlüge ab.</li><li>Menschen nur auszunutzen verletzt ihre Würde.</li></ul><p class="muted">Unterschied zur Goldenen Regel: Verallgemeinerbarkeit statt persönlicher Wünsche.</p>'},
+{t:'Christliche Ethik',h:'<h2>Christliche Ethik</h2><h3>Grundlagen</h3><ul><li><b>Doppelgebot der Liebe</b>: Gott lieben und den Nächsten wie sich selbst (Mk 12,28 bis 31).</li><li><b>Zehn Gebote</b> (Dekalog, Ex 20 und Dtn 5).</li><li><b>Bergpredigt</b> (Mt 5 bis 7): Seligpreisungen, Feindesliebe (Mt 5,44), Goldene Regel (Mt 7,12).</li><li><b>Barmherziger Samariter</b> (Lk 10,25 bis 37): Nächster ist, wer meine Hilfe braucht.</li><li><b>Weltgericht</b> (Mt 25): Hilfe für Hungrige, Fremde und Kranke ist Dienst an Christus.</li></ul><h3>Menschenbild</h3><ul><li><b>Gottebenbildlichkeit</b> (Gen 1,27): unantastbare Würde jedes Menschen.</li><li><b>Schöpfungsverantwortung</b>: Die Welt ist anvertraut, nicht verfügbar.</li><li><b>Gnade</b>: Der Mensch wird aus Gnade gerecht; gute Taten sind die Antwort darauf (Paulus, Luther).</li></ul><h3>Merke</h3><p>Begründung ist der Glaube; Handlungsorientierung geben Liebe, Barmherzigkeit und Gerechtigkeit. Ein besonderer Blick gilt den Schwächsten.</p>'},
+{t:'Verantwortungsethik',h:'<h2>Verantwortungsethik</h2><h3>Max Weber (1864 bis 1920)</h3><ul><li>„Politik als Beruf“ (1919): <b>Gesinnungsethik</b> und <b>Verantwortungsethik</b>.</li><li>Der Verantwortungsethiker steht für die <b>voraussehbaren Folgen</b> seines Handelns ein.</li><li>Beide Haltungen sollen sich ergänzen.</li></ul><h3>Hans Jonas (1903 bis 1993)</h3><ul><li><i>Das Prinzip Verantwortung</i> (1979): Antwort auf die Macht der Technik.</li><li>Imperativ: „Handle so, dass die Wirkungen deiner Handlung verträglich sind mit der Permanenz echten menschlichen Lebens auf Erden.“</li><li><b>Heuristik der Furcht</b>: Mögliche Katastrophen dienen als Warnung.</li><li>Verantwortung gilt auch für <b>künftige Generationen</b> und die <b>Natur</b>.</li></ul><h3>Frage der Verantwortung</h3><p><b>Wer</b> ist <b>wofür</b> gegenüber <b>wem</b> verantwortlich?</p><h3>Kritik</h3><p>Folgen sind schwer vorherzusehen; die Grenze der Verantwortung ist unklar.</p>'},
+{t:'Fallbeispiele beurteilen',h:'<h2>Ein Fallbeispiel beurteilen</h2><p>Im Boss-Kampf wirst du jede Ethik einzeln befragen. So gehst du vor:</p><ul><li><b>1. Fall beschreiben:</b> Wer ist beteiligt? Was ist die Entscheidung?</li><li><b>2. Konflikt benennen:</b> Welche Werte stehen gegeneinander?</li><li><b>3. Vier Ethiken befragen:</b><ul><li>Utilitarismus: Wer gewinnt, wer verliert? Gesamtnutzen?</li><li>Kant: Maxime verallgemeinerbar? Wird jemand bloß als Mittel benutzt?</li><li>Christlich: Was verlangen Nächstenliebe, Würde und Barmherzigkeit?</li><li>Verantwortung: Absehbare Folgen, Zukunft, wer trägt sie?</li></ul></li><li><b>4. Vergleichen:</b> Wo urteilen die Ethiken gleich, wo verschieden?</li><li><b>5. Urteil fällen:</b> Entscheide dich und begründe, welche Argumente dich überzeugen. Nenne auch ein Gegenargument.</li></ul><p class="q">Tipp: Falsche Antworten im Boss-Kampf verwechseln fast immer die Ethik. Frage dich: Geht es um Folgen, Pflicht, Liebe oder Verantwortung?</p>'}
+];
+
+/* ---------- Profil, Siegel, Zustand ---------- */
+var BYID={};BANK.forEach(function(q){BYID[q.id]=q});
+var BADGES=[{id:'first',n:'Erster Funke',d:'Beende deine erste Runde.',i:'flame'},{id:'perfect',n:'Perfekter Zauber',d:'Beantworte in einer Runde alles richtig.',i:'star'},
+{id:'boss',n:'Schattenbezwinger',d:'Löse den Boss-Fall mit allen vier Ethiken richtig.',i:'skull'},{id:'streak',n:'Feuerserie',d:'Erreiche 5 richtige Antworten in Folge.',i:'award'},
+{id:'team',n:'Gefährte des Lichts',d:'Gewinne eine Runde im Zusammenarbeitsmodus.',i:'users'},{id:'duel',n:'Duellsieger',d:'Gewinne ein Duell gegen mindestens eine andere Person.',i:'swords'},
+{id:'reader',n:'Bibliophil',d:'Öffne das Buch der Weisheit.',i:'book'}];
+var P={name:LS.get('name',''),av:LS.get('av',0),xp:LS.get('xp',0),runs:LS.get('runs',0),badges:LS.get('badges',{}),used:LS.get('used',[]),usedBoss:LS.get('usedBoss',[])};
+function saveP(){['name','av','xp','runs','badges','used','usedBoss'].forEach(function(k){LS.set(k,P[k])})}
+function rankOf(xp){var i=0;RANKS.forEach(function(r,k){if(xp>=r[0])i=k});var nx=RANKS[i+1];return {name:RANKS[i][1],pct:nx?Math.round((xp-RANKS[i][0])/(nx[0]-RANKS[i][0])*100):100,next:nx?nx[0]:null}}
+var base=null;
+var G={room:null,code:null,solo:false,S:null,maxRev:0,dl:0,qStart:0,spec:false,cur:{},run:null,my:null,myA:{},answered:false,joinedAt:0,unsub:[],conn:true,dead:false,tk:0,hb:0,book:0,gain:null,awardedSeed:null,tip:0,screen:'intro'};
+function resetMy(){G.my={sc:0,st:0,best:0,okc:0,bossOk:false,bossFr:0};G.myA={};G.answered=false;G.cur={}}
+resetMy();
+var toastT=0;
+function toast(m,ms){var t=$('#toast');t.innerHTML='<div class="toast" role="status">'+esc(m)+'</div>';clearTimeout(toastT);toastT=setTimeout(function(){t.innerHTML=''},ms||3200)}
+/* ---------- Räume ---------- */
+function LocalRoom(){var me={peer:'local',isMe:true,sameTab:true,kind:'viewer',guest:false,by:null,presence:{},updatedAt:Date.now()},hs={},ph=[];
+ return {emit:function(t,d){setTimeout(function(){(hs[t]||[]).slice().forEach(function(h){h({topic:t,data:d,peer:'local',isMe:true,sameTab:true,kind:'viewer',guest:false,by:null})})},0);return Promise.resolve()},
+ on:function(t,h){(hs[t]=hs[t]||[]).push(h);return function(){hs[t]=(hs[t]||[]).filter(function(x){return x!==h})}},
+ presence:function(p){var np=Object.assign({},me.presence);for(var k in p){if(p[k]===null)delete np[k];else np[k]=p[k]}me=Object.assign({},me,{presence:np,updatedAt:Date.now()});ph.slice().forEach(function(h){h({peers:[me],joined:[],left:[],updated:[me]})});return Promise.resolve()},
+ peers:function(){return [me]},onPeers:function(h){ph.push(h);setTimeout(function(){h({peers:[me],joined:[me],left:[],updated:[]})},0);return function(){ph=ph.filter(function(x){return x!==h})}},
+ connected:function(){return true},onConnection:function(h){setTimeout(function(){h(true)},0);return function(){}},leave:function(){return Promise.resolve()}}}
+function pres(p){if(G.room){try{G.room.presence(p).catch(function(){})}catch(e){}}}
+function plist(){return G.room?G.room.peers().filter(function(p){return p.kind!=='agent'&&p.presence&&p.presence.name}):[]}
+function hostPeer(){var a=plist(),best=null;a.forEach(function(p){var t=+p.presence.t||0;if(!best||t<best.t||(t===best.t&&p.peer<best.p.peer))best={t:t,p:p}});return best&&best.p}
+function iAmHost(){var h=hostPeer();return !!(h&&h.sameTab)}
+function players(){return plist().filter(function(p){return !p.presence.sp})}
+async function joinRoom(code,solo){
+  var room=null;
+  if(!solo&&base){try{room=await base.join('ethos-'+code.toLowerCase())}catch(e){room=null;toast('Die Lobby konnte nicht geöffnet werden. Du spielst solo.',5000)}}
+  else if(!solo){toast('Mehrspieler ist hier nicht verfügbar. Du spielst solo.',5000)}
+  if(!room){room=LocalRoom();solo=true;code='SOLO'}
+  teardown();resetMy();
+  G.room=room;G.code=code;G.solo=solo;G.S=null;G.maxRev=0;G.run=null;G.spec=false;G.dead=false;G.conn=true;G.joinedAt=Date.now();G.gain=null;
+  var onErr=function(){G.dead=true;toast('Die Verbindung zur Lobby wurde beendet.',5000);render()};
+  G.unsub=[room.on('state',onStateMsg,onErr),room.onPeers(onPeers,onErr),room.onConnection(function(c){G.conn=c;schedRender()},onErr)];
+  pres({name:P.name,av:P.av,t:Date.now(),sc:0,st:0,q:-1});
+  G.tk=setInterval(tick,400);G.hb=setInterval(heartbeat,4000);
+  go('lobby');
+}
+function teardown(){clearInterval(G.tk);clearInterval(G.hb);(G.unsub||[]).forEach(function(u){try{u()}catch(e){}});G.unsub=[];if(G.room){try{G.room.leave()}catch(e){}}G.room=null}
+function leaveRoom(){teardown();G.S=null;G.run=null;G.spec=false;go('menu')}
+/* ---------- Zustand senden und empfangen ---------- */
+function emitErr(e){if(e&&e.code==='not_permitted')toast('Dir fehlen die Rechte zum Mitspielen. Die Seite muss dir als Mitwirkender (Contributor) freigegeben sein.',7000)}
+function hostEmit(patch){if(!G.room)return;var s=Object.assign({},G.S||{ph:'lobby',mode:'vs',tp:ALLTP.slice(),n:6,i:0,fl:3,lt:0},patch);s.rev=G.maxRev+1;try{G.room.emit('state',s).catch(emitErr)}catch(e){}}
+function heartbeat(){if(G.room&&G.S&&iAmHost()){try{G.room.emit('state',Object.assign({},G.S,{left:Math.max(0,(G.dl-Date.now())/1000)})).catch(function(){})}catch(e){}}}
+function cleanState(s){
+  if(!s||typeof s!=='object')return null;if(['lobby','load','q','rv','end'].indexOf(s.ph)<0)return null;
+  var c=function(v,a,b,d){v=+v;if(isNaN(v))v=d;return Math.max(a,Math.min(b,v))};
+  var o={ph:s.ph,rev:c(s.rev,0,1e9,0),mode:s.mode==='coop'?'coop':'vs',n:c(s.n,1,12,6),i:c(s.i,0,20,0),left:c(s.left,0,300,0),fl:c(s.fl,0,9,3),lt:c(s.lt,0,30,0),good:s.good?1:0,win:s.win?1:0,seed:c(s.seed,0,2e9,0),boss:c(s.boss,0,CASES.length-1,0)};
+  o.tp=(Array.isArray(s.tp)?s.tp:[]).filter(function(t){return TOP[t]}).slice(0,8);if(!o.tp.length)o.tp=ALLTP.slice();
+  o.ids=(Array.isArray(s.ids)?s.ids:[]).filter(function(id){return typeof id==='string'&&BYID[id]}).slice(0,12);
+  if(o.ph!=='lobby'&&o.ids.length)o.n=o.ids.length;
+  return o}
+function onStateMsg(m){var s=cleanState(m&&m.data);if(s)applyState(s)}
+function applyState(s){
+  if(G.S&&s.rev<=G.S.rev)return;
+  var prev=G.S;G.S=s;G.maxRev=s.rev;G.dl=Date.now()+s.left*1000;
+  var changed=!prev||prev.ph!==s.ph||prev.i!==s.i;
+  if(!prev&&s.ph!=='lobby'){G.spec=true;pres({sp:1})}
+  if(s.ph==='lobby'){G.spec=false;resetMy();G.run=null;pres({sp:null,sc:0,st:0,q:-1,d:null,a:null,ok:null,fr:null,pts:0,pk:null})}
+  if(s.ph==='load'&&(prev&&prev.ph==='lobby'||!G.run)){if(!G.spec)resetMy();pres({sc:0,st:0,q:-1,d:null,a:null,ok:null,fr:null,pts:0,pk:null});G.tip=Math.floor(Math.random()*TIPS.length)}
+  if(s.ids.length&&(!G.run||G.run.seed!==s.seed))buildRun(s);
+  if(s.ph==='q'&&changed){var v=curView();G.cur=newCur(v);G.answered=false;G.qStart=Date.now();pres({pk:null})}
+  if(s.ph==='end')awardEnd();
+  if(changed)G.sound=0;
+  render(changed)}
+function onPeers(ch){if(ch.joined.some(function(p){return !p.isMe})&&G.S&&iAmHost())heartbeat();schedRender()}
+/* ---------- Fragen und Wertung ---------- */
+function viewOf(q,seed){
+  var r=rng(hash(seed+':'+q.id)),b={id:q.id,tp:q.tp,ty:q.ty,tx:q.q,ex:q.ex};
+  if(q.ty==='mc'){var o=shuffle([q.c].concat(q.w),r);b.opts=o;b.cor=o.indexOf(q.c);b.dur=25}
+  else if(q.ty==='tf'){b.opts=['Wahr','Mythos'];b.cor=q.a?0:1;b.dur=18}
+  else if(q.ty==='ma'){var R=shuffle(q.p.map(function(x){return x[1]}),r);b.L=q.p.map(function(x){return x[0]});b.R=R;b.map=q.p.map(function(x){return R.indexOf(x[1])});b.dur=50}
+  else{var ix=shuffle(q.items.map(function(_,i){return i}),r);b.items=ix.map(function(i){return q.items[i]});b.ord=ix;b.sorted=q.items;b.dur=50}
+  return b}
+function bossView(ci,seed){var c=CASES[ci],r=rng(hash(seed+':boss'));
+  return {id:'boss',tp:'bs',ty:'bs',cs:c,dur:120,lens:c.L.map(function(l){var o=shuffle([l[1],l[2],l[3]],r);return {e:l[0],opts:o,cor:o.indexOf(l[1])}})}}
+function buildRun(s){G.run={seed:s.seed,qs:s.ids.map(function(id){return viewOf(BYID[id],s.seed)}),boss:bossView(s.boss,s.seed)}}
+function curView(){var S=G.S;if(!S||!G.run)return null;return S.i<G.run.qs.length?G.run.qs[S.i]:G.run.boss}
+function newCur(v){if(!v)return {};if(v.ty==='ma'){var m=[];v.L.forEach(function(){m.push(-1)});return {map:m,al:-1}}if(v.ty==='or')return {seq:[]};if(v.ty==='bs')return {bl:[-1,-1,-1,-1],bv:-1};return {pk:-1}}
+function grade(v,a){var c=0;
+  if(v.ty==='mc'||v.ty==='tf'){var ok=a===v.cor;return {ok:ok,fr:ok?1:0}}
+  if(v.ty==='ma'){v.map.forEach(function(m,i){if(a&&a[i]===m)c++});return {ok:c===v.map.length,fr:c/v.map.length}}
+  if(v.ty==='or'){v.ord.forEach(function(_,k){if(a&&a[k]!=null&&v.ord[a[k]]===k)c++});return {ok:c===v.ord.length,fr:c/v.ord.length}}
+  v.lens.forEach(function(l,k){if(a&&a.l&&a.l[k]===l.cor)c++});return {ok:c===v.lens.length,fr:c/v.lens.length}}
+function submit(ans){
+  var S=G.S;if(!S||S.ph!=='q'||G.spec||G.answered)return;var v=curView();if(!v)return;
+  var left=(G.dl-Date.now())/1000,g=grade(v,ans),pts;
+  if(v.ty==='bs')pts=Math.round(g.fr*4)*150;else{pts=Math.round(100*g.fr);if(g.ok)pts+=Math.round(100*Math.max(0,Math.min(1,left/v.dur)))+Math.min(G.my.st,5)*20}
+  var m=G.my;G.answered=true;G.myA[S.i]={a:ans,ok:g.ok,fr:g.fr,pts:pts};m.sc+=pts;
+  if(v.ty==='bs'){m.bossOk=g.ok;m.bossFr=g.fr}
+  if(g.ok){m.st++;if(v.ty!=='bs')m.okc++}else m.st=0;m.best=Math.max(m.best,m.st);
+  pres({q:S.i,d:1,a:ans,ok:g.ok?1:0,fr:g.fr,pts:pts,sc:m.sc,st:m.st,pk:null});render()}
+function autoSubmit(){var v=curView();if(!v)return;var c=G.cur,a;
+  if(v.ty==='mc'||v.ty==='tf')a=c.pk!=null?c.pk:-1;else if(v.ty==='ma')a=c.map;else if(v.ty==='or')a=c.seq;else a={l:c.bl,v:c.bv};submit(a)}
+/* ---------- Host-Ablauf ---------- */
+function allAnswered(){var ps=players();return ps.length>0&&ps.every(function(p){return p.presence.q===G.S.i&&p.presence.d===1})}
+function hostReveal(){var S=G.S,ps=players(),sum=0;ps.forEach(function(p){if(p.presence.q===S.i)sum+=(+p.presence.fr||0)});
+  var avg=ps.length?sum/ps.length:0,boss=S.i>=S.n,good=avg>=(boss?0.75:0.5),fl=S.fl,lt=S.lt;if(good)lt++;else fl--;
+  hostEmit({ph:'rv',left:boss?20:10,fl:Math.max(0,fl),lt:lt,good:good?1:0})}
+function hostNext(){var S=G.S;
+  if(S.mode==='coop'&&S.fl<=0)hostEmit({ph:'end',left:0,win:0});
+  else if(S.i<S.n)hostEmit({ph:'q',i:S.i+1,left:G.run.qs[S.i+1]?G.run.qs[S.i+1].dur:G.run.boss.dur});
+  else hostEmit({ph:'end',left:0,win:S.mode==='coop'&&S.fl>0?1:0})}
+function pickRun(tps,n){var used=P.used,pools={},out=[],g=0;
+  tps.forEach(function(t){pools[t]=shuffle(BANK.filter(function(q){return q.tp===t}))});
+  var order=shuffle(tps);
+  while(out.length<n&&g<300){var t=order[g%order.length];g++;var pl=pools[t];
+    var q=pl.find(function(x){return used.indexOf(x.id)<0&&out.indexOf(x.id)<0})||pl.find(function(x){return out.indexOf(x.id)<0});if(q)out.push(q.id)}
+  P.used=used.concat(out).slice(-70);var bs=[];CASES.forEach(function(_,i){if(P.usedBoss.indexOf(i)<0)bs.push(i)});if(!bs.length){P.usedBoss=[];bs=CASES.map(function(_,i){return i})}
+  var boss=bs[Math.floor(Math.random()*bs.length)];P.usedBoss=P.usedBoss.concat([boss]).slice(-3);saveP();return {ids:shuffle(out),boss:boss}}
+function startRun(){var S=G.S;if(!S)return;var r=pickRun(S.tp,S.n);hostEmit({ph:'load',seed:Math.floor(Math.random()*1e9)+1,ids:r.ids,boss:r.boss,i:0,fl:3,lt:0,good:0,win:0,left:7})}
+function tick(){
+  if(!G.room)return;var S=G.S,now=Date.now();
+  if(!S){if(iAmHost()&&(G.solo||now-G.joinedAt>3000))hostEmit({ph:'lobby'});return}
+  tickUI();
+  if(S.ph==='q'&&!G.spec&&!G.answered&&now>=G.dl)autoSubmit();
+  if(!iAmHost())return;
+  if(S.ph==='load'&&now>=G.dl&&G.run)hostEmit({ph:'q',i:0,left:G.run.qs[0].dur});
+  else if(S.ph==='q'){if((allAnswered()&&now>G.qStart+1200)||now>G.dl+2500)hostReveal()}
+  else if(S.ph==='rv'&&now>=G.dl)hostNext()}
+/* ---------- Belohnungen ---------- */
+function awardEnd(){var S=G.S;if(G.spec||G.awardedSeed===S.seed||!G.run)return;G.awardedSeed=S.seed;
+  var m=G.my,ps=players(),win=false,gain=30+m.okc*10+(m.bossOk?50:0);
+  if(S.mode==='coop')win=S.fl>0;else{var top=0;ps.forEach(function(p){top=Math.max(top,+p.presence.sc||0)});win=ps.length>1&&m.sc>=top&&m.sc>0}
+  if(win)gain+=20;
+  P.xp+=gain;P.runs++;var nb=[];
+  var give=function(id){if(!P.badges[id]){P.badges[id]=1;nb.push(id)}};
+  give('first');if(m.okc===S.n&&m.bossOk)give('perfect');if(m.bossOk)give('boss');if(m.best>=5)give('streak');if(S.mode==='coop'&&win)give('team');if(S.mode==='vs'&&win&&ps.length>1)give('duel');
+  saveP();G.gain={xp:gain,nb:nb,win:win}}
+
+/* ---------- Darstellung ---------- */
+G.screen=P.name?'menu':'intro';var netState=0;
+function go(s){G.screen=s;render(true)}
+var rq=0;function schedRender(){if(rq)return;rq=requestAnimationFrame(function(){rq=0;render()})}
+function nm(p){return esc(String(p&&p.name||'Wanderer').slice(0,18))}
+function avH(pr,sz){var s=SIGILS[(+(pr&&pr.av))||0]||SIGILS[0];return '<span class="av" style="--sz:'+sz+'px;--c:'+s.c+'">'+icon(s.g)+'</span>'}
+function netChip(){return netState===1?'<span class="chip ok" id="netchip">Mehrspieler bereit</span>':netState===2?'<span class="chip warn" id="netchip">Nur Solo möglich</span>':'<span class="chip" id="netchip">Verbinde …</span>'}
+function updateNet(){var c=$('#netchip');if(c)c.outerHTML=netChip()}
+function render(fresh){
+  var h,cl='';
+  if(G.screen==='intro'){h=vIntro();cl=' center'}else if(G.screen==='menu')h=vMenu();else h=vRoom();
+  $('#app').innerHTML='<div class="screen'+cl+(fresh?' fresh':'')+'">'+h+'</div>';
+  if(G.screen==='room'||G.screen==='lobby')tickUI()}
+function vIntro(){return '<div><h1 class="logo">ETHOS</h1><div class="sub">Das Orakel der Entscheidungen</div></div><div class="panel intro-card"><p class="muted">Die Nebel lichten sich. Wie sollen dich die Schatten nennen?</p>'+
+  '<input id="nm" type="text" maxlength="18" autocomplete="off" placeholder="Dein Name" value="'+esc(P.name)+'" aria-label="Dein Name"><div class="lbl">Wähle dein Siegel</div><div class="sigs">'+
+  SIGILS.map(function(s,i){return '<button class="sig'+(P.av===i?' on':'')+'" data-act="sig" data-i="'+i+'">'+avH({av:i},44)+s.n+'</button>'}).join('')+'</div><button class="btn gold big" data-act="enter">Das Tor öffnen</button></div>'}
+function vMenu(){var r=rankOf(P.xp),n=0;BADGES.forEach(function(b){if(P.badges[b.id])n++});
+  return '<div class="row"><div><h1 class="logo" style="font-size:clamp(30px,6vw,52px)">ETHOS</h1><div class="sub" style="margin-top:6px">Das Orakel der Entscheidungen</div></div><span class="sp"></span>'+netChip()+'</div>'+
+  '<div class="menu-grid"><div class="panel col"><div class="hero">'+avH({av:P.av},72)+'<div style="flex:1;min-width:0"><div class="nm">'+esc(P.name)+'</div><div class="muted">'+esc(r.name)+'</div><div class="xp"><i style="width:'+r.pct+'%"></i></div><div class="lbl" style="margin-top:6px">'+P.xp+' Erfahrung'+(r.next?' · nächster Rang bei '+r.next:'')+'</div></div></div>'+
+  '<div class="row"><button class="btn sm" data-act="badges">'+icon('award',16)+'Siegel ('+n+'/'+BADGES.length+')</button><button class="btn sm ghost" data-act="rename">Namen ändern</button></div>'+
+  '<p class="muted">Löse Fragen zu Normen, Dilemmas, Utilitarismus, Kant, Christlicher Ethik und Verantwortung. Am Ende wartet immer ein Boss-Fallbeispiel.</p></div>'+
+  '<div class="panel col"><button class="btn gold big" data-act="create">'+icon('door',20)+'Lobby erstellen</button><div class="row"><input id="code" class="codein" type="text" maxlength="6" placeholder="CODE" autocomplete="off" aria-label="Lobby-Code"><button class="btn" data-act="join">Beitreten</button></div>'+
+  '<button class="btn" data-act="solo">'+icon('user',18)+'Solo-Training</button><button class="btn" data-act="book">'+icon('book',18)+'Buch der Weisheit lesen</button></div></div>'}
+function plH(rv){var ps=plist(),h=hostPeer(),S=G.S;
+  ps.sort(function(a,b){return rv?(+b.presence.sc||0)-(+a.presence.sc||0):(+a.presence.t||0)-(+b.presence.t||0)});
+  return '<div class="players">'+ps.map(function(p){var pr=p.presence,done=S&&S.ph==='q'&&pr.q===S.i&&pr.d===1&&!pr.sp;
+    return '<div class="pl'+(p.sameTab?' me':'')+(done?' done':'')+'">'+avH(pr,34)+'<span class="nm">'+nm(pr)+'</span>'+(h&&p.peer===h.peer?'<span title="Gastgeber" style="color:var(--gold)">'+icon('crown',17)+'</span>':'')+(pr.sp?'<span class="chip">Zuschauer</span>':'')+
+    (rv&&S.ph==='rv'&&pr.q===S.i?'<span class="chip '+(pr.ok?'ok':'')+'">+'+(+pr.pts||0)+'</span>':'')+(rv?'<span class="sc">'+(+pr.sc||0)+'</span>':'')+'</div>'}).join('')+'</div>'}
+function vRoom(){var S=G.S;
+  if(!S)return '<div class="panel col center" style="align-items:center;text-align:center;margin:auto"><div class="ring"><i></i><i></i><i></i><b>'+icon('eye',38)+'</b></div><div class="h2">Verbinde mit der Lobby '+esc(G.code)+' …</div><p class="muted">Das dauert einige Sekunden. Findet sich niemand, prüfe den Code und ob alle Zugriff auf diese Seite haben.</p><button class="btn" data-act="leave">Abbrechen</button></div>';
+  if(S.ph==='lobby')return vLobby();if(S.ph==='load')return vLoad();if(S.ph==='end')return vEnd();return vQuestion(S.ph==='rv')}
+function warnH(){var w='';if(G.dead||!G.conn)w+='<div class="banner bad">Die Verbindung ist unterbrochen. Warte kurz oder verlasse die Lobby.</div>';
+  if(G.spec)w+='<div class="banner neutral">Die Runde läuft schon. Du schaust zu und steigst in der nächsten Runde ein.</div>';return w}
+function vLobby(){var S=G.S,host=iAmHost(),d=host?'':' disabled',ps=plist().length;
+  var modes='<div class="modes"><button class="mode'+(S.mode==='vs'?' on':'')+'" data-act="mode" data-m="vs"'+d+'><b>'+icon('swords',20)+'Wettkampf</b><span>Duell: Wer antwortet richtig und schnell, gewinnt.</span></button><button class="mode'+(S.mode==='coop'?' on':'')+'" data-act="mode" data-m="coop"'+d+'><b>'+icon('shield',20)+'Gemeinsam</b><span>Story: Ihr beratet euch und rettet zusammen das Licht.</span></button></div>';
+  var tps='<div class="tps">'+TOPICS.map(function(t){return '<button class="tp'+(S.tp.indexOf(t.id)>=0?' on':'')+'" style="--c:'+t.c+'" data-act="tp" data-t="'+t.id+'"'+d+'><i></i>'+t.n+'</button>'}).join('')+'</div>';
+  var len='<div class="seg"'+d+'>'+[[4,'Kurz'],[6,'Normal'],[9,'Lang']].map(function(x){return '<button class="'+(S.n===x[0]?'on':'')+'" data-act="len" data-v="'+x[0]+'"'+d+'>'+x[1]+' ('+x[0]+')</button>'}).join('')+'</div>';
+  return warnH()+'<div class="menu-grid"><div class="panel col"><div class="lbl">'+(G.solo?'Solo-Training':'Lobby-Code')+'</div>'+
+   (G.solo?'':'<div class="row"><span class="code-box">'+esc(G.code)+'</span><button class="btn sm" data-act="copy">'+icon('copy',16)+'Kopieren</button></div><p class="muted">Gib den Code weiter. Mitspielende brauchen Zugriff auf diese Seite.'+(ps<2?' Noch bist du allein.':'')+'</p>')+
+   '<div class="lbl">Spielende ('+ps+')</div>'+plH(false)+'</div>'+
+   '<div class="panel col"><div class="lbl">Modus</div>'+modes+'<div class="lbl">Themen</div>'+tps+'<div class="lbl">Länge (plus Boss-Fall)</div>'+len+
+   '<div class="row" style="margin-top:4px"><button class="btn" data-act="book">'+icon('book',18)+'Buch lesen</button><span class="sp"></span><button class="btn ghost" data-act="leave">Verlassen</button>'+
+   (host?'<button class="btn gold big" data-act="start">'+icon('star',18)+(!G.solo&&ps<2?'Allein starten':'Runde starten')+'</button>':'<span class="chip">Der Gastgeber startet die Runde</span>')+'</div></div></div>'}
+function vLoad(){var S=G.S;if(!G.tipAt||Date.now()-G.tipAt>20000)G.tipAt=Date.now();
+  return '<div class="center" style="display:flex;flex-direction:column;align-items:center;gap:22px;margin:auto;text-align:center"><div class="sub">'+(S.mode==='coop'?'Gemeinsam gegen die Schatten':'Das Duell beginnt')+'</div><div class="ring"><i></i><i></i><i></i><b>'+icon('eye',40)+'</b></div><div class="h2">Das Orakel erwacht …</div>'+
+  '<div class="tipbox"><span class="lbl">Wusstest du?</span><p id="tip">'+esc(TIPS[G.tip%TIPS.length])+'</p></div><div class="prog"><i id="lprog"></i></div><div class="row" style="justify-content:center">'+plist().map(function(p){return avH(p.presence,30)}).join('')+'</div></div>'}
+var CAP=['Die Nebel lichten sich.','Ein Tor aus Runen öffnet sich.','Flüstern in der Bibliothek der Schatten.','Das Orakel prüft deinen Willen.','Fackeln flackern im Gang.','Die Wächter der Pflicht treten vor.','Ein Windstoß trägt die Stimmen der Weisen.','Der Kristall des Urteils glüht.','Die letzte Schwelle ist erreicht.'];
+function vQuestion(rv){var S=G.S,v=curView();if(!v)return '<div class="panel col" style="margin:auto;text-align:center"><div class="h2">Die Runde wird vorbereitet …</div><button class="btn" data-act="leave">Verlassen</button></div>';var boss=v.ty==='bs',coop=S.mode==='coop',my=G.myA[S.i];
+  var nodes='';for(var k=0;k<S.n;k++)nodes+='<span class="node'+(k<S.i||(k===S.i&&rv)?' past':k===S.i?' now':'')+'">'+(k+1)+'</span>';
+  nodes+='<span class="node boss'+(S.i===S.n?(rv?' past':' now'):'')+'" title="Boss-Fall">'+icon('skull',16)+'</span>';
+  var tp=boss?'Boss-Fall':TOP[v.tp].n,res='';
+  if(rv){var ok=my&&my.ok,part=my&&!ok&&my.fr>0;
+    res='<div class="banner '+(my?(ok?'good':part?'neutral':'bad'):'neutral')+'">'+(G.spec?'Du schaust zu.':my?(ok?'Richtig! +'+my.pts+' Punkte':part?'Teilweise richtig. +'+my.pts+' Punkte':'Leider falsch.'+(my.pts?' +'+my.pts:'')):'Keine Antwort gegeben.')+'</div>'+
+    (coop?'<div class="banner '+(S.good?'good':'bad')+'">'+(S.good?'Das Team besteht die Prüfung, das Licht wächst.':'Das Team scheitert, eine Flamme erlischt.')+'</div>':'')}
+  var body=boss?bsH(v,rv):v.ty==='ma'?maH(v,rv):v.ty==='or'?orH(v,rv):optsH(v,rv);
+  var act='';
+  if(!rv&&!G.answered&&!G.spec){var ready=v.ty==='mc'||v.ty==='tf'?G.cur.pk>=0:v.ty==='ma'?G.cur.map.every(function(x){return x>=0}):v.ty==='or'?G.cur.seq.length===v.items.length:G.cur.bl.every(function(x){return x>=0})&&G.cur.bv>=0;
+    if(v.ty!=='mc'&&v.ty!=='tf'||coop)act='<div class="row">'+(v.ty==='or'?'<button class="btn sm" data-act="orreset">Zurücksetzen</button>':'')+'<span class="sp"></span><button class="btn gold" data-act="confirm"'+(ready?'':' disabled')+'>'+(coop&&(v.ty==='mc'||v.ty==='tf')?'Antwort der Gruppe festlegen':'Antwort bestätigen')+'</button></div>'}
+  if(!rv&&G.answered&&!G.spec)act='<div class="banner neutral">Antwort gespeichert. Warte auf die anderen …</div>';
+  var ex=rv?'<div class="expl"><b>Merke:</b> '+esc(boss?'Befrage jede Ethik mit ihrer Leitfrage und vergleiche die Urteile.':v.ex)+'</div>':'';
+  var hostBtn=rv&&iAmHost()?'<div class="row"><span class="sp"></span><button class="btn" data-act="next">Weiter</button></div>':'';
+  var head='<div class="hud"><div class="nodes">'+nodes+'</div><div class="timer"><i id="tbar"></i></div><span class="tsec" id="tsec"></span></div>';
+  var story=coop?'<div class="story">'+(boss?'Die Kammer des Urteils: Der Schatten stellt dir einen Fall.':CAP[S.i%CAP.length])+'</div>':'';
+  var side='<div class="side">'+(coop?'<div class="panel pad-s col"><div class="lbl">Flammen des Teams</div><div class="flames">'+[0,1,2].map(function(i){return '<span class="'+(i<S.fl?'':'off')+'">'+icon('flame',24)+'</span>'}).join('')+'</div><div class="lbl">Licht der Weisheit</div><div class="xp"><i style="width:'+Math.round(S.lt/(S.n+1)*100)+'%"></i></div></div>':'')+
+    '<div class="panel pad-s col"><div class="lbl">'+(coop?'Team':'Rangliste')+'</div>'+plH(true)+'</div></div>';
+  return warnH()+head+'<div class="game"><div class="panel qcard">'+story+'<div class="qtag"><span class="chip" style="color:'+(boss?'var(--gold-2)':TOP[v.tp].c)+'">'+esc(tp)+'</span><span class="chip">'+(boss?'Mehrere Ethiken':v.ty==='mc'?'Auswahl':v.ty==='tf'?'Wahr oder Mythos':v.ty==='ma'?'Zuordnen':'Reihenfolge')+'</span></div>'+
+    (boss?'':'<div class="qtext">'+esc(v.tx)+'</div>')+body+act+res+ex+hostBtn+'</div>'+side+'</div>'}
+function picks(k,rv){var S=G.S;return players().filter(function(p){var pr=p.presence;return rv?(pr.q===S.i&&pr.a===k):(pr.pk===k&&pr.q!==S.i)}).map(function(p){return avH(p.presence,20)}).join('')}
+function optsH(v,rv){var S=G.S,coop=S.mode==='coop',m=G.myA[S.i],mine=rv?(m?m.a:null):(G.answered&&m?m.a:G.cur.pk);
+  return '<div class="opts'+(v.ty==='tf'?'':'')+'">'+v.opts.map(function(o,k){var c='opt';
+    if(rv)c+=k===v.cor?' ok':mine===k?' bad':' dim';else if(G.answered)c+=(mine===k?' sel':' dim')+' lock';else if(G.spec)c+=' lock';else if(coop&&mine===k)c+=' sel';
+    var dots=(rv||coop)?picks(k,rv):'';
+    return '<button class="'+c+'" data-act="opt" data-k="'+k+'"><span class="k">'+(v.ty==='tf'?(k?'✗':'✓'):'ABCD'[k])+'</span><span>'+esc(o)+'</span>'+(rv&&mine===k?'<span class="tag me">Du</span>':'')+(dots?'<span class="dots">'+dots+'</span>':'')+'</button>'}).join('')+'</div>'}
+function maH(v,rv){var S=G.S,m=G.myA[S.i],sel=rv?(m&&m.a)||[]:(G.answered&&m?m.a:G.cur.map),lock=G.answered||G.spec?' lock':'';
+  if(rv)return '<div class="col">'+v.L.map(function(l,i){var ok=sel[i]===v.map[i];return '<div class="opt '+(ok?'ok':'bad')+'"><span class="lt">'+(i+1)+'</span><span><b>'+esc(l)+'</b><br>'+esc(v.R[v.map[i]])+(ok||sel[i]==null||sel[i]<0?'':'<br><small class="muted">Deine Wahl: '+esc(v.R[sel[i]])+'</small>')+'</span></div>'}).join('')+'</div>';
+  return '<div class="pair"><div class="col">'+v.L.map(function(l,i){return '<button class="opt'+(G.cur.al===i?' sel':'')+lock+'" data-act="ml" data-i="'+i+'"><span class="lt">'+(i+1)+'</span><span>'+esc(l)+'</span>'+(sel[i]>=0?'<span class="slot">'+'ABCD'[sel[i]]+'</span>':'')+'</button>'}).join('')+'</div><div class="col">'+
+   v.R.map(function(r,j){return '<button class="opt'+lock+'" data-act="mr" data-j="'+j+'"><span class="lt">'+'ABCD'[j]+'</span><span>'+esc(r)+'</span></button>'}).join('')+'</div></div>'}
+function orH(v,rv){var S=G.S,m=G.myA[S.i],seq=rv?(m&&m.a)||[]:(G.answered&&m?m.a:G.cur.seq),lock=G.answered||G.spec?' lock':'';
+  if(rv)return '<div class="col">'+v.sorted.map(function(t,k){var ok=seq[k]!=null&&v.ord[seq[k]]===k;return '<div class="opt '+(ok?'ok':'bad')+'"><span class="k">'+(k+1)+'</span><span>'+esc(t)+'</span></div>'}).join('')+'</div>';
+  return '<div class="col">'+v.items.map(function(t,d){var at=seq.indexOf(d);return '<button class="opt'+(at>=0?' sel':'')+lock+'" data-act="or" data-d="'+d+'"><span class="k">'+(at>=0?at+1:'·')+'</span><span>'+esc(t)+'</span></button>'}).join('')+'</div><p class="muted">Tippe die Schritte in der richtigen Reihenfolge an.</p>'}
+function bsH(v,rv){var S=G.S,m=G.myA[S.i],a=rv?(m&&m.a)||{l:[],v:-1}:(G.answered&&m?m.a:{l:G.cur.bl,v:G.cur.bv}),lock=G.answered||G.spec?' lock':'',c=v.cs;
+  var h='<div class="boss-case"><span class="lbl" style="color:var(--gold)">Boss-Fallbeispiel</span><h3>'+esc(c.t)+'</h3><p>'+esc(c.s)+'</p></div><div class="col">';
+  v.lens.forEach(function(l,k){h+='<div class="lens"><h4>'+icon('scale',17)+'Wie argumentiert die '+ETH[l.e]+'?</h4>'+l.opts.map(function(o,j){var c2='opt'+lock;
+    if(rv)c2+=j===l.cor?' ok':a.l[k]===j?' bad':' dim';else if(a.l[k]===j)c2+=' sel';
+    return '<button class="'+c2+'" data-act="bl" data-l="'+k+'" data-k="'+j+'"><span class="k">'+'ABC'[j]+'</span><span>'+esc(o)+'</span></button>'}).join('')+'</div>'});
+  var vs=[c.va,c.vb,'Ein dritter Weg (z. B. schweigen, verhandeln, Hilfe holen)'],cnt=[0,0,0],tot=0;
+  if(rv)players().forEach(function(p){var pr=p.presence;if(pr.q===S.i&&pr.a&&typeof pr.a==='object'&&pr.a.v>=0&&pr.a.v<3){cnt[pr.a.v]++;tot++}});
+  h+='<div class="lens"><h4>'+icon('crown',17)+'Dein Urteil über den Fall</h4><div class="votes">'+vs.map(function(t,j){return '<button class="opt'+lock+(a.v===j?' sel':'')+'" data-act="bv" data-k="'+j+'"><span>'+esc(t)+(rv?'<span class="vbar"><i style="width:'+(tot?Math.round(cnt[j]/tot*100):0)+'%"></i></span><small class="muted">'+cnt[j]+' Stimme'+(cnt[j]===1?'':'n')+'</small>':'')+'</span></button>'}).join('')+'</div>'+(rv?'<p class="muted">Das Urteil wird nicht bewertet. Entscheidend ist, dass du es mit den vier Ethiken begründen kannst.</p>':'')+'</div></div>';
+  return h}
+function vEnd(){var S=G.S,ps=plist().filter(function(p){return !p.presence.sp}).sort(function(a,b){return (+b.presence.sc||0)-(+a.presence.sc||0)}),coop=S.mode==='coop',g=G.gain;
+  var top='';
+  if(coop)top='<div class="banner '+(S.win?'good':'bad')+'" style="justify-content:center;font-size:20px">'+(S.win?'Das Orakel ist erleuchtet! Ihr habt die Schatten besiegt.':'Die Schatten haben gesiegt. Versucht es noch einmal.')+'</div>';
+  else top='<div class="podium">'+ps.slice(0,3).map(function(p,i){return '<div class="pod'+(i===0?' first':'')+'"><span class="rk">'+(i+1)+'</span>'+avH(p.presence,54)+'<b>'+nm(p.presence)+'</b><span class="muted">'+(+p.presence.sc||0)+' Punkte</span></div>'}).join('')+'</div>';
+  var gain=g?'<div class="gain"><span class="chip ok">+'+g.xp+' Erfahrung</span>'+g.nb.map(function(id){var b=BADGES.filter(function(x){return x.id===id})[0];return '<span class="chip warn">Neues Siegel: '+esc(b.n)+'</span>'}).join('')+'</div>':'';
+  return warnH()+'<div class="panel col" style="max-width:720px;margin:auto;width:100%"><div class="h2" style="text-align:center">'+(coop?'Ende der Reise':'Das Duell ist entschieden')+'</div>'+top+gain+'<div class="lbl">Ergebnis</div>'+plH(true)+
+   '<div class="row" style="justify-content:center"><button class="btn" data-act="book">'+icon('book',18)+'Buch lesen</button>'+(iAmHost()?'<button class="btn gold" data-act="again">Neue Runde mit neuen Fragen</button>':'<span class="chip">Der Gastgeber startet die nächste Runde</span>')+'<button class="btn ghost" data-act="leave">Verlassen</button></div></div>'}
+function tickUI(){var S=G.S;if(!S)return;var left=Math.max(0,(G.dl-Date.now())/1000),tb=$('#tbar'),ts=$('#tsec'),v=S.ph==='q'?curView():null;
+  if(tb&&ts){var dur=S.ph==='q'?(v?v.dur:30):(S.i>=S.n?20:10);tb.style.width=Math.min(100,left/dur*100)+'%';tb.parentNode.classList.toggle('low',S.ph==='q'&&left<6);ts.textContent=Math.ceil(left)}
+  var pr=$('#lprog');if(pr&&S.ph==='load')pr.style.width=Math.min(100,(1-left/7)*100)+'%';
+  var tp=$('#tip');if(tp&&S.ph==='load'&&Date.now()-G.tipAt>3200){G.tipAt=Date.now();G.tip=(G.tip+1)%TIPS.length;tp.textContent=TIPS[G.tip];tp.style.animation='none';void tp.offsetWidth;tp.style.animation=''}}
+/* ---------- Overlays ---------- */
+function closeOv(){$('#overlay').innerHTML=''}
+function renderBook(){var i=G.book;$('#overlay').innerHTML='<div class="overlay" data-act="ovbg"><div class="book" role="dialog" aria-modal="true" aria-label="Buch der Weisheit"><div class="bhead">'+icon('book',22)+'<span class="h2" style="font-size:20px">Das Buch der Weisheit</span><span class="sp"></span><button class="icon-btn" data-act="close" aria-label="Schließen">'+icon('x')+'</button></div><nav class="toc">'+BOOK.map(function(b,k){return '<button class="'+(k===i?'on':'')+'" data-act="bk" data-i="'+k+'">'+esc(b.t)+'</button>'}).join('')+'</nav><article class="page">'+BOOK[i].h+'</article></div></div>'}
+function renderBadges(){$('#overlay').innerHTML='<div class="overlay" data-act="ovbg"><div class="panel dlg" role="dialog" aria-modal="true" aria-label="Siegel"><div class="row"><span class="h2">Deine Siegel</span><span class="sp"></span><button class="icon-btn" data-act="close" aria-label="Schließen">'+icon('x')+'</button></div>'+BADGES.map(function(b){return '<div class="badge'+(P.badges[b.id]?'':' off')+'"><span class="bi">'+icon(b.i,22)+'</span><div><b>'+esc(b.n)+'</b><small>'+esc(b.d)+'</small></div></div>'}).join('')+'</div></div>'}
+
+/* ---------- Aktionen ---------- */
+var AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newCode(){var s='';for(var i=0;i<5;i++)s+=AL[Math.floor(Math.random()*AL.length)];return s}
+function openBook(i){G.book=i||0;renderBook();if(!P.badges.reader){P.badges.reader=1;saveP();toast('Neues Siegel: Bibliophil')}}
+var resetLobby={ph:'lobby',ids:[],seed:0,boss:0,i:0,fl:3,lt:0,good:0,win:0,left:0};
+var ACT={
+ sig:function(el,d){P.av=+d.i;saveP();document.querySelectorAll('.sig').forEach(function(b){b.classList.toggle('on',b===el)})},
+ enter:function(){var v=($('#nm').value||'').trim().slice(0,18);if(!v){toast('Bitte gib einen Namen ein.');return}P.name=v;saveP();go('menu')},
+ rename:function(){go('intro')},
+ create:function(){joinRoom(newCode(),false)},
+ join:function(){var c=($('#code').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length<4){toast('Der Code hat 5 Zeichen.');return}joinRoom(c,false)},
+ solo:function(){joinRoom('SOLO',true)},
+ book:function(){openBook(0)},badges:function(){renderBadges()},close:closeOv,bk:function(el,d){G.book=+d.i;renderBook()},
+ copy:function(){var done=function(){toast('Code kopiert: '+G.code)},fail=function(){toast('Dein Code lautet '+G.code,5000)};try{navigator.clipboard.writeText(G.code).then(done,fail)}catch(e){fail()}},
+ leave:function(){leaveRoom()},
+ mode:function(el,d){if(iAmHost())hostEmit({mode:d.m})},
+ tp:function(el,d){if(!iAmHost())return;var t=G.S.tp.slice(),i=t.indexOf(d.t);if(i>=0){if(t.length>1)t.splice(i,1);else{toast('Mindestens ein Thema bleibt aktiv.');return}}else t.push(d.t);hostEmit({tp:t})},
+ len:function(el,d){if(iAmHost())hostEmit({n:+d.v})},
+ start:function(){if(iAmHost())startRun()},
+ again:function(){if(iAmHost())hostEmit(resetLobby)},
+ next:function(){if(iAmHost()&&G.S.ph==='rv')hostNext()},
+ opt:function(el,d){var S=G.S;if(!S||S.ph!=='q'||G.answered||G.spec)return;var k=+d.k;if(S.mode==='coop'){G.cur.pk=k;pres({pk:k});render()}else submit(k)},
+ confirm:function(){autoSubmit()},
+ ml:function(el,d){if(G.answered||G.spec)return;G.cur.al=+d.i;render()},
+ mr:function(el,d){if(G.answered||G.spec)return;var c=G.cur,j=+d.j,i=c.al;if(i<0)i=c.map.indexOf(-1);if(i<0)return;c.map=c.map.map(function(x){return x===j?-1:x});c.map[i]=j;c.al=c.map.indexOf(-1);render()},
+ or:function(el,d){if(G.answered||G.spec)return;var q=G.cur.seq,k=+d.d,p=q.indexOf(k);if(p<0)q.push(k);else if(p===q.length-1)q.pop();render()},
+ orreset:function(){G.cur.seq=[];render()},
+ bl:function(el,d){if(G.answered||G.spec)return;G.cur.bl[+d.l]=+d.k;render()},
+ bv:function(el,d){if(G.answered||G.spec)return;G.cur.bv=+d.k;render()}
+};
+document.addEventListener('click',function(e){var t=e.target;
+  if(t.dataset&&t.dataset.act==='ovbg'){closeOv();return}
+  var el=t.closest&&t.closest('[data-act]');if(!el||el.dataset.act==='ovbg')return;var f=ACT[el.dataset.act];if(f)f(el,el.dataset)});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&$('#overlay').firstChild){closeOv();return}
+  if(e.key==='Enter'&&e.target.id==='nm'){ACT.enter();return}
+  if(e.key==='Enter'&&e.target.id==='code'){ACT.join()}});
+/* ---------- Funkenflug im Hintergrund ---------- */
+(function(){var c=$('#motes'),x=c.getContext('2d'),W=0,H=0,m=[],i;
+  function rs(){W=c.width=innerWidth;H=c.height=innerHeight}rs();addEventListener('resize',rs);
+  for(i=0;i<55;i++)m.push({x:Math.random()*W,y:Math.random()*H,r:.6+Math.random()*1.7,s:.08+Math.random()*.3,p:Math.random()*6.28});
+  function f(t){x.clearRect(0,0,W,H);m.forEach(function(o){o.y-=o.s;o.x+=Math.sin(t/2200+o.p)*.25;if(o.y<-5){o.y=H+5;o.x=Math.random()*W}
+    x.beginPath();x.fillStyle='rgba(246,220,144,'+(.22+.22*Math.sin(t/900+o.p))+')';x.arc(o.x,o.y,o.r,0,6.28);x.fill()});requestAnimationFrame(f)}
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(f)})();
+
+/* ---------- Firebase-Anbindung für GitHub Pages ---------- */
+/* >>> HIER DEINE FIREBASE-DATEN EINFÜGEN (Anleitung im Chat) <<< */
+var FBC={apiKey:"AIzaSyDoVDkCL0bgHkbfmsKiy510--Fa2EWbHzE",authDomain:"religionsgame-f7fee.firebaseapp.com",databaseURL:"https://religionsgame-f7fee-default-rtdb.europe-west1.firebasedatabase.app",projectId:"religionsgame-f7fee",appId:"1:489374867439:web:a0990094f0a894fd04e01a"};
+function FbRoom(name){
+  var db=firebase.database(),root=db.ref('ethos/'+name),pRef=root.child('p'),sRef=root.child('state'),cRef=db.ref('.info/connected'),
+  me='p'+Math.random().toString(36).slice(2,9),mine=pRef.child(me),pr={},others={},hs={},ph=[],cn=[],lastS=null,left=false;
+  function peers(){var a=[{peer:me,presence:pr,isMe:true,sameTab:true,kind:'viewer',guest:false,by:null,updatedAt:Date.now()}];
+    Object.keys(others).forEach(function(k){a.push({peer:k,presence:others[k],isMe:false,sameTab:false,kind:'viewer',guest:false,by:null,updatedAt:Date.now()})});return a}
+  function fire(j,l){ph.slice().forEach(function(h){h({peers:peers(),joined:j,left:l,updated:[]})})}
+  function msg(v){return {topic:'state',data:v,peer:'db',isMe:false,sameTab:false,kind:'viewer',guest:false,by:null}}
+  function onP(snap){var v=snap.val()||{},old=others,j=[],l=[];others={};
+    Object.keys(v).forEach(function(k){if(k!==me){others[k]=v[k]||{};if(!old[k])j.push({peer:k,isMe:false})}});
+    Object.keys(old).forEach(function(k){if(!others[k])l.push({peer:k,isMe:false})});fire(j,l)}
+  function onS(snap){var v=snap.val();if(!v)return;lastS=v;(hs.state||[]).slice().forEach(function(h){h(msg(v))})}
+  function onC(snap){var c=!!snap.val();cn.slice().forEach(function(h){h(c)})}
+  try{mine.onDisconnect().remove()}catch(e){}
+  pRef.on('value',onP);sRef.on('value',onS);cRef.on('value',onC);
+  return {
+    emit:function(t,d){if(t!=='state'||left)return Promise.resolve();return sRef.set(JSON.parse(JSON.stringify(d)))},
+    on:function(t,h){(hs[t]=hs[t]||[]).push(h);if(t==='state'&&lastS)setTimeout(function(){h(msg(lastS))},0);return function(){hs[t]=(hs[t]||[]).filter(function(x){return x!==h})}},
+    presence:function(p){if(left)return Promise.resolve();var n=Object.assign({},pr);for(var k in p){if(p[k]===null)delete n[k];else n[k]=p[k]}pr=n;fire([],[]);return mine.update(p)},
+    peers:peers,
+    onPeers:function(h){ph.push(h);setTimeout(function(){h({peers:peers(),joined:peers(),left:[],updated:[]})},0);return function(){ph=ph.filter(function(x){return x!==h})}},
+    connected:function(){return true},
+    onConnection:function(h){cn.push(h);return function(){cn=cn.filter(function(x){return x!==h})}},
+    leave:function(){left=true;try{pRef.off('value',onP);sRef.off('value',onS);cRef.off('value',onC);mine.onDisconnect().cancel()}catch(e){}return mine.remove()}}}
+function fbJoin(name){var db=firebase.database(),pRef=db.ref('ethos/'+name+'/p'),sRef=db.ref('ethos/'+name+'/state');
+  return pRef.once('value').then(function(s){if(!s.val())return sRef.remove()}).then(function(){return FbRoom(name)})}
+/* ---------- Start ---------- */
+render(true);
+(function(){if(window.firebase&&String(FBC.databaseURL).indexOf('HIER')<0){try{firebase.initializeApp(FBC);base={join:fbJoin}}catch(e){base=null}}netState=base?1:2;updateNet()})();
+})();
+</script>
+
+</body></html>
